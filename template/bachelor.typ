@@ -22,8 +22,388 @@
   ],
   keywords-en: ("UAV swarm", "path planning", "multi-obstacle environment", "Mantis Search Algorithm", "AL-SHADE", "Artificial Potential Field"),
   appendix: [
-    == Test
-    这是附录内容……
+    == 伪代码汇总
+
+    本附录汇总正文中引用或涉及的主要算法伪代码，算法编号与正文引用保持一致。
+
+    #algorithm(
+      title: [二维编队一致性控制主循环],
+      input: [
+        无人机数量 $n$，仿真时长 $T$，采样周期 $Delta t$，
+        期望相对位置矩阵 $bold(R)_x$, $bold(R)_y$，
+        增益 $k_1, k_2, k_3 = k_1 k_2$，时间常数 $tau_v$，
+        机动约束 $v_min, v_max, a_min, a_max, omega_min, omega_max$，
+        时延上界 $h_m$，切换拓扑序列 $G(t)$。
+      ],
+      output: [所有无人机轨迹。],
+      [*for* $i arrow 1$ *to* $n$ *do*],
+      indent(
+        [$(x_i, y_i) arrow$ 初始位置，$(v_(x i), v_(y i)) arrow$ 初始速度，$theta_i arrow$ 初始航向],
+        [$v_(x i)^c arrow v_(x i)$, $v_(y i)^c arrow v_(y i)$],
+      ),
+      [$t arrow 0$],
+      [*while* $t < T$ *do*],
+      indent(
+        [*for* $i arrow 1$ *to* $n$ *do*],
+        indent(
+          [$N_i(t) arrow$ 从 $G(t)$ 获取邻居集],
+          [读取延迟状态：$x_j(t - tau_(i j))$, $y_j(t - tau_(i j))$, $v_(x j)(t - tau_(i j))$, $v_(y j)(t - tau_(i j))$, $forall V_j in N_i(t)$],
+          [$u_(x i) arrow$ 按式@eqt:improved-consensus-x 计算],
+          [$u_(y i) arrow$ 按式@eqt:improved-consensus-y 计算],
+          [调用 ConstraintAdjust（见算法@alg:constraint-adj）修正 $(u_(x i), u_(y i))$],
+          [$v_(x i)^c arrow v_(x i) + tau_v u_(x i)$, $quad v_(y i)^c arrow v_(y i) + tau_v u_(y i)$],
+          [$v_(x i) arrow v_(x i) + frac(Delta t, tau_v)(v_(x i)^c - v_(x i))$, $quad v_(y i) arrow v_(y i) + frac(Delta t, tau_v)(v_(y i)^c - v_(y i))$],
+          [$x_i arrow x_i + v_(x i) Delta t$, $quad y_i arrow y_i + v_(y i) Delta t$],
+          [$theta_i arrow arctan(v_(y i) / v_(x i))$, $quad v_i arrow sqrt(v_(x i)^2 + v_(y i)^2)$],
+        ),
+        [$t arrow t + Delta t$，按序列更新 $G(t)$],
+      ),
+      [*return* ${(x_i(t), y_i(t)) | t in [0, T], i in 1..n}$],
+    ) <alg:formation-control>
+
+    #v(0.6em)
+    #algorithm(
+      title: [约束最小调整子过程 ConstraintAdjust],
+      input: [原始控制量 $u_(x i), u_(y i)$，当前速度 $v_i$、航向 $theta_i$，
+        加速度边界 $a_max, v_max, v_min$，航向速率边界 $omega_min, omega_max$，采样周期 $Delta t$。],
+      output: [约束修正后的控制量 $(u'_(x i), u'_(y i))$。],
+      [$alpha_i arrow sqrt(u_(x i)^2 + u_(y i)^2)$],
+      [$v_i^"pred" arrow v_i + alpha_i Delta t$],
+      [*if* $v_i^"pred" > v_max$ *or* $v_i^"pred" < v_min$ *then*],
+      indent(
+        [$a_(max)^"new" arrow min(a_max, (v_max - v_i) / Delta t)$],
+        [*if* $alpha_i > a_(max)^"new"$ *then* $(u_(x i), u_(y i)) arrow frac(a_(max)^"new", alpha_i) (u_(x i), u_(y i))$],
+      ),
+      [$theta_i^"pred" arrow arctan((v_(y i) + u_(y i) Delta t) / (v_(x i) + u_(x i) Delta t))$],
+      [$theta_min arrow theta_i + omega_min Delta t$, $quad theta_max arrow theta_i + omega_max Delta t$],
+      [*if* $theta_i^"pred" > theta_max$ *or* $theta_i^"pred" < theta_min$ *then*],
+      indent(
+        [将 $theta_i^"pred"$ 修正至最近边界 $theta_("bound")$],
+        [联立求解：$frac(v_(y i) + u_(y i) Delta t, v_(x i) + u_(x i) Delta t) = tan theta_("bound")$ 且 $u_(x i)^2 + u_(y i)^2 = alpha_i^2$],
+      ),
+      [*return* $(u_(x i), u_(y i))$],
+    ) <alg:constraint-adj>
+
+    #v(0.6em)
+    #algorithm(
+      title: [PSO 全局路径规划算法],
+      input: [
+        起始点 $bold(S)$，目标点 $bold(T)$，障碍物集合 $cal(O)$，
+        航点数 $N$，种群规模 $P$，最大迭代次数 $T_("max")$，
+        惯性权重 $omega$，学习因子 $c_1, c_2$。
+      ],
+      output: [全局最优航点序列 $bold(W)^"*" = {bold(w)_1^"*", dots, bold(w)_N^"*"}$。],
+      [计算基线航点 $bold(W)^("base")$ 及搜索边界 $bold(W)^(min), bold(W)^(max)$],
+      [*for* $i in 1..P$ *do*],
+      indent(
+        [$bold(X)_i arrow$ 在 $[bold(W)^(min), bold(W)^(max)]$ 内随机初始化],
+        [$bold(V)_i arrow 0$, $quad bold(P)_i^("best") arrow bold(X)_i$],
+      ),
+      [$bold(G)^("best") arrow$ 初始种群中适应度最低的粒子],
+      [*for* $t in 1..T_("max")$ *do*],
+      indent(
+        [*for* $i in 1..P$ *do*],
+        indent(
+          [$r_1, r_2 arrow$ 采样自 $cal(U)(0, 1)$],
+          [$bold(V)_i arrow omega bold(V)_i + c_1 r_1 (bold(P)_i^("best") - bold(X)_i) + c_2 r_2 (bold(G)^("best") - bold(X)_i)$],
+          [$bold(X)_i arrow bold(X)_i + bold(V)_i$，裁剪至 $[bold(W)^(min), bold(W)^(max)]$],
+          [$J_i arrow$ 按式 $J = alpha L_"norm" + beta S_"norm" + gamma R_"norm" + mu W_"norm" + lambda_f F_"norm"$ 计算适应度],
+          [*if* $J_i < J(bold(P)_i^("best"))$ *then* $bold(P)_i^("best") arrow bold(X)_i$],
+          [*if* $J_i < J(bold(G)^("best"))$ *then* $bold(G)^("best") arrow bold(X)_i$],
+        ),
+      ),
+      [*return* $bold(W)^"*" arrow bold(G)^("best")$],
+    ) <alg:pso-global>
+
+    #v(0.6em)
+    #algorithm(
+      title: [ACO 全局路径规划算法],
+      input: [
+        起始点 $bold(S)$，目标点 $bold(T)$，障碍物集合 $cal(O)$，
+        航点数 $N$，档案容量 $K$，蚂蚁数量 $M$，最大迭代次数 $T_("max")$，
+        集中度参数 $q$，蒸发率 $xi$。
+      ],
+      output: [全局最优航点序列 $bold(W)^"*" = {bold(w)_1^"*", dots, bold(w)_N^"*"}$。],
+      [$cal(A) arrow$ 生成 $2K$ 个基线扰动解，评估后保留最佳 $K$ 个],
+      [计算高斯核权重 $omega_l$ 与选择概率 $p_l$, $l = 1, dots, K$],
+      [*for* $t in 1..T_("max")$ *do*],
+      indent(
+        [$cal(S)^("new") arrow emptyset$],
+        [*for* $m in 1..M$ *do*],
+        indent(
+          [以概率 $p_l$ 从 $cal(A)$ 选取引导解 $bold(s)_("guide")$],
+          [$sigma_j arrow xi dot "mean"_(l) |bold(s)_(l,j) - bold(s)_("guide",j)| + epsilon$, $forall j in 1..2N$],
+          [$bold(X)^("new") arrow bold(s)_("guide") + cal(N)(bold(0), "diag"(bold(sigma)^2))$],
+          [评估 $J(bold(X)^("new"))$，将 $(J(bold(X)^("new")), bold(X)^("new"))$ 加入 $cal(S)^("new")$],
+        ),
+        [$cal(A) arrow cal(A) union cal(S)^("new")$，按 $J$ 排序并截断至前 $K$ 个],
+      ),
+      [*return* $bold(W)^"*" arrow cal(A)$ 中适应度最优的解],
+    ) <alg:aco-global>
+
+    #v(0.6em)
+    #algorithm(
+      title: [GA 全局路径规划算法],
+      input: [
+        起始点 $bold(S)$，目标点 $bold(T)$，障碍物集合 $cal(O)$，
+        航点数 $N$，种群规模 $P$，最大代数 $G_"max"$，
+        变异概率 $p_m$，初始变异强度 $sigma_0$，锦标赛规模 $k$。
+      ],
+      output: [全局最优航点序列 $bold(W)^"*" = {bold(w)_1^"*", dots, bold(w)_N^"*"}$。],
+      [$cal(P) arrow$ 基线扰动初始化 $P$ 个个体，评估适应度],
+      [*for* $g in 1..G_"max"$ *do*],
+      indent(
+        [按 $J$ 排序 $cal(P)$，设 $cal(P)_("next") arrow$ 精英个体 $cal(P)[1 .. P_"elite"]$],
+        [$sigma arrow sigma_0 (1 - g / G_"max")$],
+        [*while* $|cal(P)_("next")| < P$ *do*],
+        indent(
+          [$bold(C)_(p_1) arrow "TournamentSelect"(cal(P), k)$, $bold(C)_(p_2) arrow "TournamentSelect"(cal(P), k)$],
+          [$alpha arrow cal(U)(0, 1)$, $quad bold(C)_("child") arrow alpha bold(C)_(p_1) + (1 - alpha) bold(C)_(p_2)$],
+          [*for* $w in 1..N$ *do*],
+          indent(
+            [*if* $cal(U)(0, 1) < p_m$ *then* $bold(C)_("child")[w] arrow bold(C)_("child")[w] + cal(N)(0, sigma^2 bold(I)_2)$],
+          ),
+          [评估 $J(bold(C)_("child"))$，加入 $cal(P)_("next")$],
+        ),
+        [$cal(P) arrow cal(P)_("next")$],
+      ),
+      [*return* $cal(P)[1]$ 的航点编码],
+    ) <alg:ga-global>
+
+    #v(0.6em)
+    #algorithm(
+      title: [APF 局部避障控制（单步执行周期）],
+      input: [
+        无人机状态 $(bold(p)_i, bold(v)_i)$，当前目标航点 $bold(p)_("tgt")$，
+        障碍物集合 $cal(O)$，编队一致加速度 $bold(u)_i^("cons")$，
+        参数集 $Theta = \{k_r, k_t, k_3, v_("max"), a_("max"), d_("safe"), T_h, N_s, Delta t\}$。
+      ],
+      output: [满足动力学约束的自动驾驶仪速度指令 $(v_(x i)^c, v_(y i)^c)$。],
+      [*步骤 1：目标引力计算*],
+      indent(
+        [计算目标方向 $bold(d) arrow bold(p)_("tgt") - bold(p)_i$，距离 $l arrow norm(bold(d))$],
+        [$v arrow$ 若 $l < 50$ 则 $max(5, 25 dot l / 50)$ 否则 25],
+        [$bold(v)_("ref") arrow v dot bold(d) / l$，$dot(bold(v))_("ref") arrow bold(0)$（匀速巡航假设）],
+      ),
+      [*步骤 2：前视预测与减速因子*],
+      indent(
+        [$d_("pred") arrow$ 按式@eqt:predicted-clearance 沿 $bold(v)_i$ 方向预测未来 $T_h$ 内的最小障碍物间隙],
+        [$lambda arrow "clip"(d_("pred") / (2.5 d_("safe")), 0.2, 1.0)$],
+        [$bold(v)_("ref")^("eff") arrow lambda bold(v)_("ref")$],
+      ),
+      [*步骤 3：障碍物斥力计算*],
+      indent(
+        [筛选距 $bold(p)_i$ 最近的障碍物 $O^"*"$，间隙 $d arrow norm(bold(p)_i - bold(c)_O) - R_O$],
+        [$d_("inf") arrow R_O + d_("safe") + 50$],
+        [*if* $d < d_("inf")$ *then*],
+        indent(
+          [$sigma arrow max(0, (d_("inf") - d) / d_("inf"))$],
+          [$bold(e)_r arrow (bold(p)_i - bold(c)_O) / norm(bold(p)_i - bold(c)_O)$],
+          [$bold(f)_("rad") arrow k_r sigma bold(e)_r$],
+          [$bold(e)_t arrow (-e_(r,y), e_(r,x))^T$; 若 $bold(v)_i dot bold(e)_t < 0$ 则 $bold(e)_t arrow -bold(e)_t$],
+          [$bold(f)_("tan") arrow k_t sigma bold(e)_t$],
+          [$bold(f)_("rep") arrow bold(f)_("rad") + bold(f)_("tan")$],
+        ),
+        [*else* $bold(f)_("rep") arrow bold(0)$],
+      ),
+      [*步骤 4：导航引力加速度*],
+      indent(
+        [$bold(u)_("nav") arrow dot(bold(v))_("ref") - k_3 (bold(v)_i - bold(v)_("ref")^("eff"))$],
+      ),
+      [*步骤 5：三通道加速度合成*],
+      indent(
+        [$bold(u)_i^("cmd") arrow bold(u)_i^("cons") + bold(u)_("nav") + bold(f)_("rep")$],
+      ),
+      [*步骤 6：动力学约束投影*],
+      indent(
+        [$bold(v)_("next") arrow bold(v)_i + bold(u)_i^("cmd") Delta t$],
+        [*if* $norm(bold(v)_("next")) > v_("max")$ *then* $bold(u)_i^("cmd") arrow (v_("max") / norm(bold(v)_("next"))) bold(u)_i^("cmd")$],
+        [*if* $norm(bold(u)_i^("cmd")) > a_("max")$ *then* $bold(u)_i^("cmd") arrow (a_("max") / norm(bold(u)_i^("cmd"))) bold(u)_i^("cmd")$],
+      ),
+      [*步骤 7：自驾仪指令映射*],
+      indent(
+        [$v_(x i)^c arrow v_(x i) + tau_v u_(x i)^("cmd")$, $quad v_(y i)^c arrow v_(y i) + tau_v u_(y i)^("cmd")$],
+      ),
+      [*return* $(v_(x i)^c, v_(y i)^c)$],
+    ) <alg:apf-local-avoidance>
+
+    #v(0.6em)
+    #algorithm(
+      title: [外部档案相似度去重更新（ArchiveDedupUpdate）],
+      input: [
+        外部档案矩阵 $cal(A) in bb(R)^(N_A times D)$，档案适应度向量 $bold(J)_A$，
+        待存入父代 $bold(x)_("parent") in bb(R)^D$，父代适应度 $J_("parent")$，
+        档案容量 $N_A$，相似度阈值 $tau_("sim") = 25.0$。
+      ],
+      output: [更新后的档案 $cal(A)$ 与适应度 $bold(J)_A$。],
+      [*步骤 1：空档案初始化*],
+      indent(
+        [*if* $|cal(A)| = 0$ *then*],
+        indent(
+          [$cal(A) arrow [bold(x)_("parent")]$, $quad bold(J)_A arrow [J_("parent")]$],
+          [*return* $cal(A)$, $bold(J)_A$],
+        ),
+      ),
+      [*步骤 2：计算父代与档案所有成员的欧氏距离*],
+      indent(
+        [*for* $j in 1..|cal(A)|$ *do* $d_j arrow norm(bold(x)_("parent") - cal(A)_j)_2$],
+        [$j^"*" arrow arg min_(j) d_j$, $quad d_("min") arrow d_(j^"*")$],
+      ),
+      [*步骤 3：三支去重决策*],
+      indent(
+        [*if* $d_("min") < tau_("sim")$ *then* — 空间高度相似],
+        indent(
+          [*if* $J_("parent") < bold(J)_A[j^"*"]$ *then* — 父代更优，替换相似成员],
+          indent(
+            [$cal(A)_(j^"*") arrow bold(x)_("parent")$, $quad bold(J)_A[j^"*"] arrow J_("parent")$],
+          ),
+          [*else* — 父代不优于相似成员，直接丢弃],
+          indent(
+            [不存入档案],
+          ),
+        ),
+        [*else* — 空间足够不相似，父代代表新区域],
+        indent(
+          [*if* $|cal(A)| < N_A$ *then* — 追加],
+          indent(
+            [$cal(A) arrow cal(A) union {bold(x)_("parent")}$, $quad bold(J)_A arrow bold(J)_A union {J_("parent")}$],
+          ),
+          [*else* — 随机替换一项（保留无偏性）],
+          indent(
+            [$k arrow$ 从 ${1, dots, N_A}$ 中均匀随机采样],
+            [$cal(A)_k arrow bold(x)_("parent")$, $quad bold(J)_A[k] arrow J_("parent")$],
+          ),
+        ),
+      ),
+      [*return* $cal(A)$, $bold(J)_A$],
+    ) <alg:archive-dedup>
+
+    #v(0.6em)
+    #algorithm(
+      title: [种群威胁度量化（ComputePopulationThreat）],
+      input: [
+        种群矩阵 $bold(X) in bb(R)^(P times 2N)$（$P$ 个个体，每行编码 $N$ 个航点），
+        障碍物集合 $cal(O)$，航点数 $N$，起始点 $bold(S)$，目标点 $bold(T)$，
+        安全距离 $d_("safe") = 20$，B 样条采样数 $N_s = 100$。
+      ],
+      output: [威胁度向量 $bold(T) = (T_1, dots, T_P)^T$, $T_i in [0, 1]$。],
+      /* [*步骤 1：个体解码与 B 样条路径生成*],
+      indent(
+        [*for* $i in 1..P$ *do*],
+        indent(
+          [航点 $bold(W)_i arrow$ 从 $bold(x)_i$ 解码为 $N times 2$ 矩阵],
+          [控制点 $bold(C)_i arrow$ 将 $bold(S)$、$bold(W)_i$、$bold(T)$ 纵向拼接为 $(N+2) times 2$ 矩阵],
+          [B 样条采样点 $bold(P)_i arrow$ GenerateCubicBSpline$(bold(C)_i, N_s)$],
+        ),
+      ), */
+      [*步骤 1：广播净空距离计算*],
+      indent(
+        [提取障碍物中心矩阵 $bold(C)_"obs"$ 及半径向量 $bold(R)_"obs"$],
+        [*forall* $i$ 同步广播计算：$bold(D)_("surf", i) = norm(bold(P)_i["," * "," "new"] - bold(C)_"obs") - bold(R)_"obs"$],
+        [$d_(i)^"min" arrow min bold(D)_("surf", i)$],
+      ),
+      [*步骤 2：三区威胁度映射*],
+      indent(
+        [*for* $i in 1..P$ *do*],
+        indent(
+          [*if* $d_(i)^"min" <= 0$ *then* $T_i arrow 1.0$],
+          [*else if* $d_(i)^"min" < d_("safe")$ *then* $T_i arrow exp(lr(-frac(2 d_(i)^"min", d_("safe") - d_(i)^"min" + epsilon)))$],
+          [*else* $T_i arrow 0.0$],
+        ),
+      ),
+      [*return* $bold(T)$],
+    ) <alg:threat-quant>
+
+    #v(0.6em)
+    #algorithm(
+      title: [TALG 双态 $F$ 生成器（GenerateTALGScalingFactors）],
+      input: [
+        历史记忆 $bold(M)_F in bb(R)^H$，各体记忆槽索引 $"slots" in {0, dots, H-1}^P$，
+        威胁度向量 $bold(T) in [0, 1]^P$，Lévy 稳定指数 $beta = 1.5$，尺度 $sigma = 0.1$，最大重试次数 $R_("max") = 100$。
+      ],
+      output: [缩放因子向量 $bold(F) = (F_1, dots, F_P)^T$，$F_i in (0, 1]$。],
+      [*for* $i in 1..P$ *do*],
+      indent(
+        [$mu_F arrow bold(M)_F["slots"[i]]$],
+        [*for* $"attempt" in 1..R_("max")$ *do*],
+        indent(
+          [*if* $"rand"(0, 1) <= T_i$ *then* — Lévy 态],
+          indent(
+            [$s arrow$ MantegnaLevy$(beta)$],
+            [$F_i arrow mu_F + sigma dot s$],
+          ),
+          [*else* — 高斯态],
+          indent(
+            [$F_i arrow mu_F + sigma dot cal(N)(0, 1)$],
+          ),
+          [*if* $F_i > 0$ *then* *break*],
+        ),
+        [*if* $"attempt" = R_("max") + 1$ *then* $F_i arrow epsilon_("machine")$],
+        [$F_i arrow min(F_i, 1.0)$],
+      ),
+      [*return* $bold(F)$],
+    ) <alg:talg-f-gen>
+
+    #v(0.6em)
+    #algorithm(
+      title: [Mantegna Lévy 步长采样器（MantegnaLevy）],
+      input: [Lévy 稳定指数 $beta in (0, 2)$，标准值 $1.5$。],
+      output: [Lévy 分布随机步长 $s$。],
+      [计算 $sigma_u arrow lr(frac(Gamma(1 + beta) dot sin(pi beta / 2), Gamma((1 + beta) / 2) dot beta dot 2^((beta - 1) / 2)))^(1 / beta)$],
+      [$u arrow cal(N)(0, sigma_u^2)$, $quad v arrow cal(N)(0, 1)$],
+      [$s arrow u / (|v|^(1 / beta) + 10^(-12))$],
+      [*return* $s$],
+    ) <alg:mantegna-levy>
+
+    #v(0.6em)
+    #algorithm(
+      title: [三次 B 样条曲线生成与路径参数化],
+      input: [
+        控制点集 $cal(C) = {bold(c)_0, bold(c)_1, dots, bold(c)_m}$（含起点 $bold(S)$ 与终点 $bold(T)$），
+        采样点数 $N_s = 100$，曲线次数 $p = 3$。
+      ],
+      output: [平滑路径采样点 $cal(P) = {bold(p)_1, dots, bold(p)_(N_s)}$。],
+      [*步骤 1：控制点预处理*],
+      indent(
+        [去除 $cal(C)$ 中连续重复点（容差 $10^(-6)$）],
+        [*if* $|cal(C)| <= 1$ *then* *return* $cal(C)$],
+        [$n_"ctrl" arrow |cal(C)|$, $quad "degree" arrow min(3, n_"ctrl" - 1)$],
+      ),
+      [*步骤 2：构造 Clamped 均匀节点向量*],
+      indent(
+        [$n arrow n_"ctrl" - 1$],
+        [$"interior" arrow$ 在 $(0, 1)$ 内均匀插入 $n - "degree"$ 个内部节点],
+        [$bold(U) arrow underbrace({0, dots, 0}, "degree"+1) dot "interior" dot underbrace({1, dots, 1}, "degree"+1)$],
+      ),
+      [*步骤 3：de Boor 递推采样*],
+      indent(
+        [$bold(P) arrow$ 空数组],
+        [*for* $u$ *in* $"linspace"(U_("degree"), U_(n_"ctrl"), N_s)$ *do*],
+        indent(
+          [*步骤 3a：定位节点区间*],
+          [*if* $u >= U_(n+1)$ *then* $k_"span" arrow n$],
+          [*else* $k_"span" arrow$ 满足 $U_(k_"span") <= u < U_(k_"span"+1)$ 的最大下标（限定在 $["degree", n]$ 内）],
+          [*步骤 3b：初始化受影响控制点*],
+          [$bold(d)_j arrow bold(c)_(k_"span" - "degree" + j)$, $quad j = 0, 1, dots, "degree"$],
+          [*步骤 3c：递推插值（r = 1→degree）*],
+          [*for* $r in 1.."degree"$ *do*],
+          indent(
+            [*for* $j in "degree" .. r$ (降序) *do*],
+            indent(
+              [$"left" arrow U_(j + k_"span" - "degree")$, $quad "right" arrow U_(j + 1 + k_"span" - r)$],
+              [$alpha arrow 0$ *if* $"right" - "left" < 10^(-12)$ *else* $(u - "left") / ("right" - "left")$],
+              [$bold(d)_j arrow (1 - alpha) bold(d)_(j-1) + alpha bold(d)_j$],
+            ),
+          ),
+          [将 $bold(d)_("degree")$ 追加至 $bold(P)$],
+        ),
+      ),
+      [*步骤 4：锚定首尾端点*],
+      indent(
+        [$bold(P)[0] arrow bold(c)_0$, $quad bold(P)[-1] arrow bold(c)_m$],
+      ),
+      [*return* $bold(P)$],
+    ) <alg:bspline-gen>
   ],
   acknowledgement: [
     在最后的最后我要感谢xxx,感谢xxx在我的学业
@@ -364,66 +744,9 @@ $
 
 控制器以周期 $Delta t$ 迭代运行。每个控制步先采集邻机的延迟状态，再根据@eqt:improved-consensus-x 和@eqt:improved-consensus-y 计算虚拟加速度；经过上述两级约束映射后，控制器输出自驾仪速度指令，并驱动无人机状态更新。该结构能够在二维平面内兼顾拓扑变化和飞行安全，为后续全局路径规划提供稳定的编队控制基础@tao2023。
 
-下面给出编队控制器的完整伪代码，主循环见#algorithm-ref(<alg:formation-control>)，约束调整子过程见#algorithm-ref(<alg:constraint-adj>)。
+编队控制器的完整伪代码已整理至附录，主循环见#algorithm-ref(<alg:formation-control>)，约束调整子过程见#algorithm-ref(<alg:constraint-adj>)。
 
-#pagebreak()
-#algorithm(
-  title: [二维编队一致性控制主循环],
-  input: [
-    无人机数量 $n$，仿真时长 $T$，采样周期 $Delta t$，
-    期望相对位置矩阵 $bold(R)_x$, $bold(R)_y$，
-    增益 $k_1, k_2, k_3 = k_1 k_2$，时间常数 $tau_v$，
-    机动约束 $v_min, v_max, a_min, a_max, omega_min, omega_max$，
-    时延上界 $h_m$，切换拓扑序列 $G(t)$。
-  ],
-  output: [所有无人机轨迹。],
-  [*for* $i arrow 1$ *to* $n$ *do*],
-  indent(
-    [$(x_i, y_i) arrow$ 初始位置，$(v_(x i), v_(y i)) arrow$ 初始速度，$theta_i arrow$ 初始航向],
-    [$v_(x i)^c arrow v_(x i)$, $v_(y i)^c arrow v_(y i)$],
-  ),
-  [$t arrow 0$],
-  [*while* $t < T$ *do*],
-  indent(
-    [*for* $i arrow 1$ *to* $n$ *do*],
-    indent(
-      [$N_i(t) arrow$ 从 $G(t)$ 获取邻居集],
-      [读取延迟状态：$x_j(t - tau_(i j))$, $y_j(t - tau_(i j))$, $v_(x j)(t - tau_(i j))$, $v_(y j)(t - tau_(i j))$, $forall V_j in N_i(t)$],
-      [$u_(x i) arrow$ 按式@eqt:improved-consensus-x 计算],
-      [$u_(y i) arrow$ 按式@eqt:improved-consensus-y 计算],
-      [调用 ConstraintAdjust（见算法@alg:constraint-adj）修正 $(u_(x i), u_(y i))$],
-      [$v_(x i)^c arrow v_(x i) + tau_v u_(x i)$, $quad v_(y i)^c arrow v_(y i) + tau_v u_(y i)$],
-      [$v_(x i) arrow v_(x i) + frac(Delta t, tau_v)(v_(x i)^c - v_(x i))$, $quad v_(y i) arrow v_(y i) + frac(Delta t, tau_v)(v_(y i)^c - v_(y i))$],
-      [$x_i arrow x_i + v_(x i) Delta t$, $quad y_i arrow y_i + v_(y i) Delta t$],
-      [$theta_i arrow arctan(v_(y i) / v_(x i))$, $quad v_i arrow sqrt(v_(x i)^2 + v_(y i)^2)$],
-    ),
-    [$t arrow t + Delta t$，按序列更新 $G(t)$],
-  ),
-  [*return* ${(x_i(t), y_i(t)) | t in [0, T], i in 1..n}$],
-) <alg:formation-control>
 
-#pagebreak()
-#algorithm(
-  title: [约束最小调整子过程 ConstraintAdjust],
-  input: [原始控制量 $u_(x i), u_(y i)$，当前速度 $v_i$、航向 $theta_i$，
-    加速度边界 $a_max, v_max, v_min$，航向速率边界 $omega_min, omega_max$，采样周期 $Delta t$。],
-  output: [约束修正后的控制量 $(u'_(x i), u'_(y i))$。],
-  [$alpha_i arrow sqrt(u_(x i)^2 + u_(y i)^2)$],
-  [$v_i^"pred" arrow v_i + alpha_i Delta t$],
-  [*if* $v_i^"pred" > v_max$ *or* $v_i^"pred" < v_min$ *then*],
-  indent(
-    [$a_(max)^"new" arrow min(a_max, (v_max - v_i) / Delta t)$],
-    [*if* $alpha_i > a_(max)^"new"$ *then* $(u_(x i), u_(y i)) arrow frac(a_(max)^"new", alpha_i) (u_(x i), u_(y i))$],
-  ),
-  [$theta_i^"pred" arrow arctan((v_(y i) + u_(y i) Delta t) / (v_(x i) + u_(x i) Delta t))$],
-  [$theta_min arrow theta_i + omega_min Delta t$, $quad theta_max arrow theta_i + omega_max Delta t$],
-  [*if* $theta_i^"pred" > theta_max$ *or* $theta_i^"pred" < theta_min$ *then*],
-  indent(
-    [将 $theta_i^"pred"$ 修正至最近边界 $theta_("bound")$],
-    [联立求解：$frac(v_(y i) + u_(y i) Delta t, v_(x i) + u_(x i) Delta t) = tan theta_("bound")$ 且 $u_(x i)^2 + u_(y i)^2 = alpha_i^2$],
-  ),
-  [*return* $(u_(x i), u_(y i))$],
-) <alg:constraint-adj>
 
 
  == 全局路径规划算法设计与实现
@@ -590,36 +913,6 @@ $
 
 粒子完成更新后，其位置会被裁剪到航点搜索边界 $[bold(w)_j^(min), bold(w)_j^(max)]$ 内。若新位置的适应度优于个体历史最优，则更新 $bold(P)_i^("best")$；若该结果进一步优于当前全局最优，则更新 $bold(G)^("best")$。随着这一过程反复进行，种群逐步向更优路径集中。算法在达到最大迭代次数 $T_("max")$ 后停止。
 
-#pagebreak()
-#algorithm(
-  title: [PSO 全局路径规划算法],
-  input: [
-    起始点 $bold(S)$，目标点 $bold(T)$，障碍物集合 $cal(O)$，
-    航点数 $N$，种群规模 $P$，最大迭代次数 $T_("max")$，
-    惯性权重 $omega$，学习因子 $c_1, c_2$。
-  ],
-  output: [全局最优航点序列 $bold(W)^"*" = {bold(w)_1^"*", dots, bold(w)_N^"*"}$。],
-  [计算基线航点 $bold(W)^("base")$ 及搜索边界 $bold(W)^(min), bold(W)^(max)$],
-  [*for* $i in 1..P$ *do*],
-  indent(
-    [$bold(X)_i arrow$ 在 $[bold(W)^(min), bold(W)^(max)]$ 内随机初始化],
-    [$bold(V)_i arrow 0$, $quad bold(P)_i^("best") arrow bold(X)_i$],
-  ),
-  [$bold(G)^("best") arrow$ 初始种群中适应度最低的粒子],
-  [*for* $t in 1..T_("max")$ *do*],
-  indent(
-    [*for* $i in 1..P$ *do*],
-    indent(
-      [$r_1, r_2 arrow$ 采样自 $cal(U)(0, 1)$],
-      [$bold(V)_i arrow omega bold(V)_i + c_1 r_1 (bold(P)_i^("best") - bold(X)_i) + c_2 r_2 (bold(G)^("best") - bold(X)_i)$],
-      [$bold(X)_i arrow bold(X)_i + bold(V)_i$，裁剪至 $[bold(W)^(min), bold(W)^(max)]$],
-      [$J_i arrow$ 按式 $J = alpha L_"norm" + beta S_"norm" + gamma R_"norm" + mu W_"norm" + lambda_f F_"norm"$ 计算适应度],
-      [*if* $J_i < J(bold(P)_i^("best"))$ *then* $bold(P)_i^("best") arrow bold(X)_i$],
-      [*if* $J_i < J(bold(G)^("best"))$ *then* $bold(G)^("best") arrow bold(X)_i$],
-    ),
-  ),
-  [*return* $bold(W)^"*" arrow bold(G)^("best")$],
-) <alg:pso-global>
 
  === 蚁群算法（ACO）设计与实现
 
@@ -665,30 +958,6 @@ $
 
 本文采用的典型参数为：档案容量 $K = 20$，蚂蚁数量 $M = 500$，最大迭代次数 $T_("max") = 500$，航点数量 $N = 20$，集中度参数 $q = 0.1$，蒸发率 $xi = 0.85$。初始档案通过基线插值叠加高斯噪声生成 $2K$ 个候选解，再从中筛选出最优的 $K$ 个解构成。适应度函数沿用五分量加权模型 $J = alpha L_"norm" + beta S_"norm" + gamma R_"norm" + mu W_"norm" + lambda_f F_"norm"$，各项定义与 PSO 保持一致，以便进行公平对比。
 
-#algorithm(
-  title: [ACO 全局路径规划算法],
-  input: [
-    起始点 $bold(S)$，目标点 $bold(T)$，障碍物集合 $cal(O)$，
-    航点数 $N$，档案容量 $K$，蚂蚁数量 $M$，最大迭代次数 $T_("max")$，
-    集中度参数 $q$，蒸发率 $xi$。
-  ],
-  output: [全局最优航点序列 $bold(W)^"*" = {bold(w)_1^"*", dots, bold(w)_N^"*"}$。],
-  [$cal(A) arrow$ 生成 $2K$ 个基线扰动解，评估后保留最佳 $K$ 个],
-  [计算高斯核权重 $omega_l$ 与选择概率 $p_l$, $l = 1, dots, K$],
-  [*for* $t in 1..T_("max")$ *do*],
-  indent(
-    [$cal(S)^("new") arrow emptyset$],
-    [*for* $m in 1..M$ *do*],
-    indent(
-      [以概率 $p_l$ 从 $cal(A)$ 选取引导解 $bold(s)_("guide")$],
-      [$sigma_j arrow xi dot "mean"_(l) |bold(s)_(l,j) - bold(s)_("guide",j)| + epsilon$, $forall j in 1..2N$],
-      [$bold(X)^("new") arrow bold(s)_("guide") + cal(N)(bold(0), "diag"(bold(sigma)^2))$],
-      [评估 $J(bold(X)^("new"))$，将 $(J(bold(X)^("new")), bold(X)^("new"))$ 加入 $cal(S)^("new")$],
-    ),
-    [$cal(A) arrow cal(A) union cal(S)^("new")$，按 $J$ 排序并截断至前 $K$ 个],
-  ),
-  [*return* $bold(W)^"*" arrow cal(A)$ 中适应度最优的解],
-) <alg:aco-global>
 
 
 
@@ -726,33 +995,6 @@ $
 
 *算法终止与参数配置。* 当算法达到最大进化代数 $G_"max"$ 时停止，输出当前种群中适应度最优的染色体，作为全局路径航点序列。本文采用的典型参数为：种群规模 $P = 500$，最大代数 $G_"max" = 500$，航点数 $N = 20$，初始变异强度 $sigma_0 = 40$，变异概率 $p_m = 0.1$，锦标赛规模 $k = 3$，精英比例 $10%$。适应度函数沿用 $J = alpha L_"norm" + beta S_"norm" + gamma R_"norm" + mu W_"norm" + lambda_f F_"norm"$，权重和分项定义与 PSO 保持一致，便于不同算法在统一评价框架下比较。
 
-#algorithm(
-  title: [GA 全局路径规划算法],
-  input: [
-    起始点 $bold(S)$，目标点 $bold(T)$，障碍物集合 $cal(O)$，
-    航点数 $N$，种群规模 $P$，最大代数 $G_"max"$，
-    变异概率 $p_m$，初始变异强度 $sigma_0$，锦标赛规模 $k$。
-  ],
-  output: [全局最优航点序列 $bold(W)^"*" = {bold(w)_1^"*", dots, bold(w)_N^"*"}$。],
-  [$cal(P) arrow$ 基线扰动初始化 $P$ 个个体，评估适应度],
-  [*for* $g in 1..G_"max"$ *do*],
-  indent(
-    [按 $J$ 排序 $cal(P)$，设 $cal(P)_("next") arrow$ 精英个体 $cal(P)[1 .. P_"elite"]$],
-    [$sigma arrow sigma_0 (1 - g / G_"max")$],
-    [*while* $|cal(P)_("next")| < P$ *do*],
-    indent(
-      [$bold(C)_(p_1) arrow "TournamentSelect"(cal(P), k)$, $bold(C)_(p_2) arrow "TournamentSelect"(cal(P), k)$],
-      [$alpha arrow cal(U)(0, 1)$, $quad bold(C)_("child") arrow alpha bold(C)_(p_1) + (1 - alpha) bold(C)_(p_2)$],
-      [*for* $w in 1..N$ *do*],
-      indent(
-        [*if* $cal(U)(0, 1) < p_m$ *then* $bold(C)_("child")[w] arrow bold(C)_("child")[w] + cal(N)(0, sigma^2 bold(I)_2)$],
-      ),
-      [评估 $J(bold(C)_("child"))$，加入 $cal(P)_("next")$],
-    ),
-    [$cal(P) arrow cal(P)_("next")$],
-  ),
-  [*return* $cal(P)[1]$ 的航点编码],
-) <alg:ga-global>
 
 
   === 螳螂搜索算法（MSA）设计与实现
@@ -782,15 +1024,15 @@ $ F = 1 - (t "mod" (T / P)) / (T / P) $ <eq:msa-recycle>
 对于追捕者行为，MSA 将 Lévy 飞行、正态分布扰动和随机方向重组结合起来更新个体位置：
 
 $ bold(x)_i^(t+1) = cases(
-  bold(x)_i^t + bold(tau)_1 dot (bold(x)_i^t - bold(x)_a^t) + |tau_2| dot bold(U) dot (bold(x)_a^t - bold(x)_b^t), "if " r_1 <= r_2,
-  bold(x)_i^t dot bold(U) + (bold(x)_a^t + bold(r)_3 dot (bold(x)_b^t - bold(x)_c^t)) dot (1 - bold(U)), "otherwise"
+  bold(x)_i^t + bold(tau)_1 dot (bold(x)_i^t - bold(x)_a^t) + |tau_2| dot bold(U) dot (bold(x)_a^t - bold(x)_b^t)quad "if " r_1 <= r_2,
+  bold(x)_i^t dot bold(U) + (bold(x)_a^t + bold(r)_3 dot (bold(x)_b^t - bold(x)_c^t)) dot (1 - bold(U))quad"otherwise"
 ) $ <eq:msa-pursuer>
 
 式中，$bold(x)_a^t$、$bold(x)_b^t$和$bold(x)_c^t$为从当前种群中随机选取的不同个体，$bold(tau)_1$为基于 Lévy 飞行生成的随机向量，$tau_2$为服从标准正态分布的随机数，$bold(U)$为二值掩码向量。$bold(U)$用于决定每个维度保留原个体信息，还是采用随机重组信息，其定义为：
 
 $ bold(U)_j = cases(
-  0, "if " r_(4,j) < r_(5,j),
-  1, "otherwise"
+  0quad"if " r_(4,j) < r_(5,j),
+  1quad "otherwise"
 ) $ <eq:msa-mask>
 
 追捕者更新式中的第一种情况偏向较大尺度的随机游走，可帮助个体跳向新的搜索区域；第二种情况通过三个随机个体的差分关系产生方向突变，用来模拟追踪过程中突然改变运动方向的行为。
@@ -798,8 +1040,8 @@ $ bold(U)_j = cases(
 伏击者行为利用外部存档中的历史较优解进行引导。设$bold(x)_("ar")^t$为从存档中随机选取的参考解，伏击者的位置更新为：
 
 $ bold(x)_i^(t+1) = cases(
-  bold(x)_i^t + alpha dot (bold(x)_("ar")^t - bold(x)_a^t), "if " r_9 <= r_(10),
-  bold(x)_("ar")^t + (2 r_7 - 1) dot mu dot (bold(x)_L + bold(r)_8 dot (bold(x)_U - bold(x)_L)), "otherwise"
+  bold(x)_i^t + alpha dot (bold(x)_("ar")^t - bold(x)_a^t)quad "if " r_9 <= r_(10),
+  bold(x)_("ar")^t + (2 r_7 - 1) dot mu dot (bold(x)_L + bold(r)_8 dot (bold(x)_U - bold(x)_L))quad "otherwise"
 ) $ <eq:msa-ambuscade>
 
 其中：
@@ -1076,8 +1318,8 @@ $ <aha-bound>
 
 $
 bold(x)_i^(t+1) = cases(
-  bold(v)_i^(t+1)   J(bold(v)_i^(t+1)) < J(bold(x)_i^t),
-  bold(x)_i^t  "otherwise"
+  bold(v)_i^(t+1) quad  J(bold(v)_i^(t+1)) < J(bold(x)_i^t),
+  bold(x)_i^t quad "otherwise"
 )
 $ <aha-greedy>
 
@@ -1250,9 +1492,9 @@ $ <archive-weighted-mean>
 
 $
 v_(i,j)^g = cases(
-  (L_j + x_(i,j)^g) / 2, v_(i,j)^g < L_j,
-  (U_j + x_(i,j)^g) / 2, v_(i,j)^g > U_j,
-  v_(i,j)^g, "otherwise"
+  (L_j + x_(i,j)^g) / 2quad v_(i,j)^g < L_j,
+  (U_j + x_(i,j)^g) / 2quad v_(i,j)^g > U_j,
+  v_(i,j)^g quad "otherwise"
 )
 $ <alshade-boundary>
 
@@ -1262,8 +1504,8 @@ $ <alshade-boundary>
 
 $
 u_(i,j)^g = cases(
-  v_(i,j)^g, "if " "rand"(0, 1) < C R_i space "or" space j = j_("rand"),
-  x_(i,j)^g, "otherwise"
+  v_(i,j)^g quad "if " "rand"(0, 1) < C R_i space "or" space j = j_("rand"),
+  x_(i,j)^g quad "otherwise"
 )
 $ <binomial-crossover>
 
@@ -1273,8 +1515,8 @@ $ <binomial-crossover>
 
 $
 bold(x)_i^(g+1) = cases(
-  bold(u)_i^g, J(bold(u)_i^g) <= J(bold(x)_i^g),
-  bold(x)_i^g, "otherwise"
+  bold(u)_i^g quad J(bold(u)_i^g) <= J(bold(x)_i^g),
+  bold(x)_i^g quad "otherwise"
 )
 $ <de-selection>
 
@@ -1496,62 +1738,6 @@ bold(u)_i^("cmd") = bold(u)_i^("cons") + bold(u)_("nav") + bold(f)_("rep") $ <in
 
 /* *分层耦合架构总结。* 局部避障层与全局规划层、编队控制层共同构成分层耦合结构。全局规划层以数秒至数十秒的周期运行，输出覆盖全程的参考航点序列；编队控制层以 0.1 s 周期运行，负责维持集群几何构型；局部避障层嵌入同一 0.1 s 控制周期内，通过加速度修正在线补充前两层指令。上层输出的全局航点在局部层中作为目标引力源，局部层输出的安全修正加速度再与编队加速度叠加，共同驱动无人机运动。这样既保留全局路径规划的远距离引导能力，也使系统能够对近场障碍物作出较快响应。
  */
-#pagebreak()
-#algorithm(
-  title: [APF 局部避障控制（单步执行周期）],
-  input: [
-    无人机状态 $(bold(p)_i, bold(v)_i)$，当前目标航点 $bold(p)_("tgt")$，
-    障碍物集合 $cal(O)$，编队一致加速度 $bold(u)_i^("cons")$，
-    参数集 $Theta = \{k_r, k_t, k_3, v_("max"), a_("max"), d_("safe"), T_h, N_s, Delta t\}$。
-  ],
-  output: [满足动力学约束的自动驾驶仪速度指令 $(v_(x i)^c, v_(y i)^c)$。],
-  [*步骤 1：目标引力计算*],
-  indent(
-    [计算目标方向 $bold(d) arrow bold(p)_("tgt") - bold(p)_i$，距离 $l arrow norm(bold(d))$],
-    [$v arrow$ 若 $l < 50$ 则 $max(5, 25 dot l / 50)$ 否则 25],
-    [$bold(v)_("ref") arrow v dot bold(d) / l$，$dot(bold(v))_("ref") arrow bold(0)$（匀速巡航假设）],
-  ),
-  [*步骤 2：前视预测与减速因子*],
-  indent(
-    [$d_("pred") arrow$ 按式@eqt:predicted-clearance 沿 $bold(v)_i$ 方向预测未来 $T_h$ 内的最小障碍物间隙],
-    [$lambda arrow "clip"(d_("pred") / (2.5 d_("safe")), 0.2, 1.0)$],
-    [$bold(v)_("ref")^("eff") arrow lambda bold(v)_("ref")$],
-  ),
-  [*步骤 3：障碍物斥力计算*],
-  indent(
-    [筛选距 $bold(p)_i$ 最近的障碍物 $O^"*"$，间隙 $d arrow norm(bold(p)_i - bold(c)_O) - R_O$],
-    [$d_("inf") arrow R_O + d_("safe") + 50$],
-    [*if* $d < d_("inf")$ *then*],
-    indent(
-      [$sigma arrow max(0, (d_("inf") - d) / d_("inf"))$],
-      [$bold(e)_r arrow (bold(p)_i - bold(c)_O) / norm(bold(p)_i - bold(c)_O)$],
-      [$bold(f)_("rad") arrow k_r sigma bold(e)_r$],
-      [$bold(e)_t arrow (-e_(r,y), e_(r,x))^T$; 若 $bold(v)_i dot bold(e)_t < 0$ 则 $bold(e)_t arrow -bold(e)_t$],
-      [$bold(f)_("tan") arrow k_t sigma bold(e)_t$],
-      [$bold(f)_("rep") arrow bold(f)_("rad") + bold(f)_("tan")$],
-    ),
-    [*else* $bold(f)_("rep") arrow bold(0)$],
-  ),
-  [*步骤 4：导航引力加速度*],
-  indent(
-    [$bold(u)_("nav") arrow dot(bold(v))_("ref") - k_3 (bold(v)_i - bold(v)_("ref")^("eff"))$],
-  ),
-  [*步骤 5：三通道加速度合成*],
-  indent(
-    [$bold(u)_i^("cmd") arrow bold(u)_i^("cons") + bold(u)_("nav") + bold(f)_("rep")$],
-  ),
-  [*步骤 6：动力学约束投影*],
-  indent(
-    [$bold(v)_("next") arrow bold(v)_i + bold(u)_i^("cmd") Delta t$],
-    [*if* $norm(bold(v)_("next")) > v_("max")$ *then* $bold(u)_i^("cmd") arrow (v_("max") / norm(bold(v)_("next"))) bold(u)_i^("cmd")$],
-    [*if* $norm(bold(u)_i^("cmd")) > a_("max")$ *then* $bold(u)_i^("cmd") arrow (a_("max") / norm(bold(u)_i^("cmd"))) bold(u)_i^("cmd")$],
-  ),
-  [*步骤 7：自驾仪指令映射*],
-  indent(
-    [$v_(x i)^c arrow v_(x i) + tau_v u_(x i)^("cmd")$, $quad v_(y i)^c arrow v_(y i) + tau_v u_(y i)^("cmd")$],
-  ),
-  [*return* $(v_(x i)^c, v_(y i)^c)$],
-) <alg:apf-local-avoidance>
 
 *控制参数分析与标定。* APF 局部避障器主要涉及三个参数：径向斥力增益 $k_r$、切向力增益 $k_t$ 和安全距离 $d_("safe")$。本文取 $k_r = 25$，使无人机在 $d_("safe") = 20$ m 的缓冲区边缘（$sigma ≈ 0.5$）受到约 12.5 N/kg 的径向斥力，能够在两到三个控制周期内改变 80 m/s 巡航状态下的航向。切向力增益取 $k_t = 15$，此时切向分量约为径向分量的 60%。仿真调试表明，比例过小（< 30%）时绕行效果不明显，比例过大（> 90%）时又可能使无人机过度偏离目标方向。安全距离 $d_("safe") = 20$ m 综合考虑编队包络半径（约 60 m）和 GPS/惯导组合定位误差（约 5–10 m），在障碍物周围形成两级缓冲：$d_("safe")$ 内为强斥力急避区，$d_("safe")$ 至 $d_("inf")$ 之间为线性衰减预警区。
 
@@ -1600,55 +1786,6 @@ $
 
 档案相似度去重的完整决策流程见#algorithm-ref(<alg:archive-dedup>)。
 
-#algorithm(
-  title: [外部档案相似度去重更新（ArchiveDedupUpdate）],
-  input: [
-    外部档案矩阵 $cal(A) in bb(R)^(N_A times D)$，档案适应度向量 $bold(J)_A$，
-    待存入父代 $bold(x)_("parent") in bb(R)^D$，父代适应度 $J_("parent")$，
-    档案容量 $N_A$，相似度阈值 $tau_("sim") = 25.0$。
-  ],
-  output: [更新后的档案 $cal(A)$ 与适应度 $bold(J)_A$。],
-  [*步骤 1：空档案初始化*],
-  indent(
-    [*if* $|cal(A)| = 0$ *then*],
-    indent(
-      [$cal(A) arrow [bold(x)_("parent")]$, $quad bold(J)_A arrow [J_("parent")]$],
-      [*return* $cal(A)$, $bold(J)_A$],
-    ),
-  ),
-  [*步骤 2：计算父代与档案所有成员的欧氏距离*],
-  indent(
-    [*for* $j in 1..|cal(A)|$ *do* $d_j arrow norm(bold(x)_("parent") - cal(A)_j)_2$],
-    [$j^"*" arrow arg min_(j) d_j$, $quad d_("min") arrow d_(j^"*")$],
-  ),
-  [*步骤 3：三支去重决策*],
-  indent(
-    [*if* $d_("min") < tau_("sim")$ *then* — 空间高度相似],
-    indent(
-      [*if* $J_("parent") < bold(J)_A[j^"*"]$ *then* — 父代更优，替换相似成员],
-      indent(
-        [$cal(A)_(j^"*") arrow bold(x)_("parent")$, $quad bold(J)_A[j^"*"] arrow J_("parent")$],
-      ),
-      [*else* — 父代不优于相似成员，直接丢弃],
-      indent(
-        [不存入档案],
-      ),
-    ),
-    [*else* — 空间足够不相似，父代代表新区域],
-    indent(
-      [*if* $|cal(A)| < N_A$ *then* — 追加],
-      indent(
-        [$cal(A) arrow cal(A) union {bold(x)_("parent")}$, $quad bold(J)_A arrow bold(J)_A union {J_("parent")}$],
-      ),
-      [*else* — 随机替换一项（保留无偏性）],
-      indent(
-        [$k arrow$ 从 ${1, dots, N_A}$ 中均匀随机采样],
-        [$cal(A)_k arrow bold(x)_("parent")$, $quad bold(J)_A[k] arrow J_("parent")$],
-      ),
-    ),
-  ),
-  [*return* $cal(A)$, $bold(J)_A$],
-) <alg:archive-dedup>
 
 === 种群威胁度量化模型
 
@@ -1669,40 +1806,6 @@ T_i = cases(
 
 种群威胁度 $T_i$ 的计算与 B 样条曲线生成紧密耦合——威胁评估的输入并非原始控制点而是光滑采样点，保证了风险评估与路径实际几何的一致性。完整威胁度量化流程见 */#algorithm-ref(<alg:threat-quant>)。
 
-#algorithm(
-  title: [种群威胁度量化（ComputePopulationThreat）],
-  input: [
-    种群矩阵 $bold(X) in bb(R)^(P times 2N)$（$P$ 个个体，每行编码 $N$ 个航点），
-    障碍物集合 $cal(O)$，航点数 $N$，起始点 $bold(S)$，目标点 $bold(T)$，
-    安全距离 $d_("safe") = 20$，B 样条采样数 $N_s = 100$。
-  ],
-  output: [威胁度向量 $bold(T) = (T_1, dots, T_P)^T$, $T_i in [0, 1]$。],
-  /* [*步骤 1：个体解码与 B 样条路径生成*],
-  indent(
-    [*for* $i in 1..P$ *do*],
-    indent(
-      [航点 $bold(W)_i arrow$ 从 $bold(x)_i$ 解码为 $N times 2$ 矩阵],
-      [控制点 $bold(C)_i arrow$ 将 $bold(S)$、$bold(W)_i$、$bold(T)$ 纵向拼接为 $(N+2) times 2$ 矩阵],
-      [B 样条采样点 $bold(P)_i arrow$ GenerateCubicBSpline$(bold(C)_i, N_s)$],
-    ),
-  ), */
-  [*步骤 1：广播净空距离计算*],
-  indent(
-    [提取障碍物中心矩阵 $bold(C)_"obs"$ 及半径向量 $bold(R)_"obs"$],
-    [*forall* $i$ 同步广播计算：$bold(D)_("surf", i) = norm(bold(P)_i["," * "," "new"] - bold(C)_"obs") - bold(R)_"obs"$],
-    [$d_(i)^"min" arrow min bold(D)_("surf", i)$],
-  ),
-  [*步骤 2：三区威胁度映射*],
-  indent(
-    [*for* $i in 1..P$ *do*],
-    indent(
-      [*if* $d_(i)^"min" <= 0$ *then* $T_i arrow 1.0$],
-      [*else if* $d_(i)^"min" < d_("safe")$ *then* $T_i arrow exp(lr(-frac(2 d_(i)^"min", d_("safe") - d_(i)^"min" + epsilon)))$],
-      [*else* $T_i arrow 0.0$],
-    ),
-  ),
-  [*return* $bold(T)$],
-) <alg:threat-quant>
 
 === 威胁驱动的 Lévy-高斯双态变异缩放因子
 
@@ -1714,8 +1817,8 @@ T_i = cases(
 
 $
 F_i = cases(
-  mu_F + sigma_F dot "Lévy"(beta), "if " "rand"(0, 1) <= T_i space "(Lévy 态)",
-  mu_F + sigma_F dot cal(N)(0, 1), "otherwise" space "(高斯态)"
+  mu_F + sigma_F dot "Lévy"(beta) quad "if " "rand"(0, 1) <= T_i space "(Lévy 态)",
+  mu_F + sigma_F dot cal(N)(0, 1) quad "otherwise" space "(高斯态)"
 ) $ <talg-dual-mode>
 
 生成后的 $F_i$ 还需要做边界处理。若 $F_i <= 0$，则重新采样，最多重试 100 次；在极端情况下将其设为机器精度 $epsilon$，避免搜索停滞。若 $F_i > 1$，则截断为 1，因为 $F = 1$ 已对应全幅差分跳跃，可视为搜索步长上限。
@@ -1733,44 +1836,7 @@ sigma_u = lr(frac(Gamma(1 + beta) sin(pi beta / 2), Gamma((1 + beta) / 2) beta 2
 
 缩放因子 $F$ 的双态生成与 Mantegna Lévy 采样器的完整流程见#algorithm-ref(<alg:talg-f-gen>) 和 #algorithm-ref(<alg:mantegna-levy>)。
 
-#algorithm(
-  title: [TALG 双态 $F$ 生成器（GenerateTALGScalingFactors）],
-  input: [
-    历史记忆 $bold(M)_F in bb(R)^H$，各体记忆槽索引 $"slots" in {0, dots, H-1}^P$，
-    威胁度向量 $bold(T) in [0, 1]^P$，Lévy 稳定指数 $beta = 1.5$，尺度 $sigma = 0.1$，最大重试次数 $R_("max") = 100$。
-  ],
-  output: [缩放因子向量 $bold(F) = (F_1, dots, F_P)^T$，$F_i in (0, 1]$。],
-  [*for* $i in 1..P$ *do*],
-  indent(
-    [$mu_F arrow bold(M)_F["slots"[i]]$],
-    [*for* $"attempt" in 1..R_("max")$ *do*],
-    indent(
-      [*if* $"rand"(0, 1) <= T_i$ *then* — Lévy 态],
-      indent(
-        [$s arrow$ MantegnaLevy$(beta)$],
-        [$F_i arrow mu_F + sigma dot s$],
-      ),
-      [*else* — 高斯态],
-      indent(
-        [$F_i arrow mu_F + sigma dot cal(N)(0, 1)$],
-      ),
-      [*if* $F_i > 0$ *then* *break*],
-    ),
-    [*if* $"attempt" = R_("max") + 1$ *then* $F_i arrow epsilon_("machine")$],
-    [$F_i arrow min(F_i, 1.0)$],
-  ),
-  [*return* $bold(F)$],
-) <alg:talg-f-gen>
 
-#algorithm(
-  title: [Mantegna Lévy 步长采样器（MantegnaLevy）],
-  input: [Lévy 稳定指数 $beta in (0, 2)$，标准值 $1.5$。],
-  output: [Lévy 分布随机步长 $s$。],
-  [计算 $sigma_u arrow lr(frac(Gamma(1 + beta) dot sin(pi beta / 2), Gamma((1 + beta) / 2) dot beta dot 2^((beta - 1) / 2)))^(1 / beta)$],
-  [$u arrow cal(N)(0, sigma_u^2)$, $quad v arrow cal(N)(0, 1)$],
-  [$s arrow u / (|v|^(1 / beta) + 10^(-12))$],
-  [*return* $s$],
-) <alg:mantegna-levy>
 
 === B 样条曲线参数化路径建模
 
@@ -1794,8 +1860,8 @@ $ <bspline-def>
 
 $
 N_(i, 0)(u) = cases(
-  1, "if " u_i <= u < u_(i+1),
-  0, "otherwise"
+  1 quad"if " u_i <= u < u_(i+1),
+  0 quad "otherwise"
 ) $ <bspline-basis0>
 
 当 $r = 1, 2, dots, p$ 时，$r$ 次基函数递推为
@@ -1812,9 +1878,9 @@ $ <bspline-basisr>
 
 $
 u_i = cases(
-  0, 0 <= i <= p,
-  frac(i - p, m - p + 1), p < i <= m,
-  1, m < i <= m + p + 1
+  0 quad 0 <= i <= p,
+  frac(i - p, m - p + 1) quad p < i <= m,
+  1 quad m < i <= m + p + 1
 ) $ <clamped-knot>
 
 其中 $i = 0, 1, dots, m+p+1$。本文采用三次 B 样条，即 $p = 3$。三次 B 样条在普通节点处具有 $C^2$ 连续性，能够使路径位置、切向方向和曲率变化更加平滑，也更符合无人机受到速度、加速度和航向角速度约束时的实际飞行特点。
@@ -1874,55 +1940,6 @@ $ <bspline-sampled-path>
 
 B 样条路径参数化的完整流程见#algorithm-ref(<alg:bspline-gen>)。
 
-#pagebreak()
-#algorithm(
-  title: [三次 B 样条曲线生成与路径参数化],
-  input: [
-    控制点集 $cal(C) = {bold(c)_0, bold(c)_1, dots, bold(c)_m}$（含起点 $bold(S)$ 与终点 $bold(T)$），
-    采样点数 $N_s = 100$，曲线次数 $p = 3$。
-  ],
-  output: [平滑路径采样点 $cal(P) = {bold(p)_1, dots, bold(p)_(N_s)}$。],
-  [*步骤 1：控制点预处理*],
-  indent(
-    [去除 $cal(C)$ 中连续重复点（容差 $10^(-6)$）],
-    [*if* $|cal(C)| <= 1$ *then* *return* $cal(C)$],
-    [$n_"ctrl" arrow |cal(C)|$, $quad "degree" arrow min(3, n_"ctrl" - 1)$],
-  ),
-  [*步骤 2：构造 Clamped 均匀节点向量*],
-  indent(
-    [$n arrow n_"ctrl" - 1$],
-    [$"interior" arrow$ 在 $(0, 1)$ 内均匀插入 $n - "degree"$ 个内部节点],
-    [$bold(U) arrow underbrace({0, dots, 0}, "degree"+1) dot "interior" dot underbrace({1, dots, 1}, "degree"+1)$],
-  ),
-  [*步骤 3：de Boor 递推采样*],
-  indent(
-    [$bold(P) arrow$ 空数组],
-    [*for* $u$ *in* $"linspace"(U_("degree"), U_(n_"ctrl"), N_s)$ *do*],
-    indent(
-      [*步骤 3a：定位节点区间*],
-      [*if* $u >= U_(n+1)$ *then* $k_"span" arrow n$],
-      [*else* $k_"span" arrow$ 满足 $U_(k_"span") <= u < U_(k_"span"+1)$ 的最大下标（限定在 $["degree", n]$ 内）],
-      [*步骤 3b：初始化受影响控制点*],
-      [$bold(d)_j arrow bold(c)_(k_"span" - "degree" + j)$, $quad j = 0, 1, dots, "degree"$],
-      [*步骤 3c：递推插值（r = 1→degree）*],
-      [*for* $r in 1.."degree"$ *do*],
-      indent(
-        [*for* $j in "degree" .. r$ (降序) *do*],
-        indent(
-          [$"left" arrow U_(j + k_"span" - "degree")$, $quad "right" arrow U_(j + 1 + k_"span" - r)$],
-          [$alpha arrow 0$ *if* $"right" - "left" < 10^(-12)$ *else* $(u - "left") / ("right" - "left")$],
-          [$bold(d)_j arrow (1 - alpha) bold(d)_(j-1) + alpha bold(d)_j$],
-        ),
-      ),
-      [将 $bold(d)_("degree")$ 追加至 $bold(P)$],
-    ),
-  ),
-  [*步骤 4：锚定首尾端点*],
-  indent(
-    [$bold(P)[0] arrow bold(c)_0$, $quad bold(P)[-1] arrow bold(c)_m$],
-  ),
-  [*return* $bold(P)$],
-) <alg:bspline-gen>
 
 *降维效应。* B 样条参数化还可以在保留路径表达能力的同时降低搜索难度。在经典航点编码中，若设置 $N = 20$ 个中间航点，优化维度为 $D = 40$。如果改用少量控制点描述曲线主体形态，需要优化的自由控制点可减少到约 $5 ~ 7$ 个，对应搜索维度降至 $10 ~ 14$。在较低维度下，差分向量 $(bold(x)_(r_1) - bold(x)_(r_2))$ 中的有效信息更集中，交叉操作也更容易保留有意义的路径结构。因此，B 样条不仅改善路径平滑性，也降低了 AL-SHADE 在高维航点空间中的搜索压力。
 
