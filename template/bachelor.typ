@@ -1945,19 +1945,32 @@ $ <bspline-sampled-path>
 
 === 全局路径形态对比
 
-下图展示了七种算法在无局部避障辅助条件下的纯全局路径规划结果。全局路径由算法输出的 $N = 20$ 个航点直接顺序连接而成（AL-SHADE 和 TALG 采用 B 样条光滑采样表示）
+下图展示了七种全局规划算法与改进 APF 局部避障器联合运行后的终态轨迹。图中黑色虚线为全局规划路径，红色曲线为领航者实际轨迹，其余彩色曲线为四架僚机轨迹，蓝色圆形区域表示障碍物及其安全缓冲区。左上角标注给出了各算法的最终到达时间、最小无人机间距和碰撞状态。
 
-#capfig(
-  image("figures/example.jpg", width: 85%),
-  caption: [七种全局路径规划算法的典型路径形态对比],
+#capsubfig(
+  (
+    (content: image("figures/lujing/final_snapshot_pso_apf.png", height: 5.2cm, fit: "contain"), subcaption: [PSO + APF]),
+    (content: image("figures/lujing/final_snapshot_aco_apf.png", height: 5.2cm, fit: "contain"), subcaption: [ACOR + APF]),
+    (content: image("figures/lujing/final_snapshot_ga_apf.png", height: 5.2cm, fit: "contain"), subcaption: [GA + APF]),
+    (content: image("figures/lujing/final_snapshot_msa_apf.png", height: 5.2cm, fit: "contain"), subcaption: [MSA + APF]),
+    (content: image("figures/lujing/final_snapshot_aha_apf.png", height: 5.2cm, fit: "contain"), subcaption: [AHA + APF]),
+    (content: image("figures/lujing/final_snapshot_alshade_origin_apf.png", height: 5.2cm, fit: "contain"), subcaption: [AL-SHADE + APF]),
+    (content: image("figures/lujing/final_snapshot_alshade_talg2_apf.png", height: 5.2cm, fit: "contain"), subcaption: [AL-SHADE-TALG-QU + APF]),
+  ),
+  columns: 2,
+  caption: [七种算法联合 APF 局部避障后的终态轨迹对比],
   label: <exp-path-compare>,
 )
 
-从路径形态可直观观察各算法的行为差异。PSO 路径整体沿起点-终点对角线方向延伸，但在 $(400, 600)$ 附近的密集障碍物区域出现明显"贴墙"现象——路径紧贴障碍物边缘通过，安全裕度极低。ACOR 路径更为曲折，在部分区域呈现出反复绕行的振荡特征，反映了高斯核引导搜索在非凸可行域中的探索冗余。GA 路径的中段较为平直（算术交叉的凸组合特性），但局部出现穿越障碍物的不可行段，说明变异操作的扰动幅度不足以完全修正不可行交叉解。
+从整体轨迹看，七种算法均能在 APF 局部避障器辅助下到达目标点，且图中碰撞状态均为 No，说明局部避障层能够对全局规划路径进行有效安全修正。但是，不同全局路径的质量直接影响 APF 的介入程度和编队轨迹形态。若全局路径在障碍物密集区过于贴近障碍物，僚机轨迹会出现更明显的横向偏移和队形拉伸；若全局路径本身较平滑且保留足够通行空间，则领航者与僚机轨迹更容易保持平行一致。
 
-MSA 路径的整体平滑性优于前三者——追踪行为和伏击行为的交替搜索使路径在多数区域保持了合理的曲率，但在中心瓶颈区域出现一段尖锐转角。AHA 路径的全局分布最为均衡：访问表驱动的觅食机制使路径在起点-终点直连线的两侧均有合理的航点分布，中心瓶颈段也保持了安全的绕行间距。然而 AHA 路径的开阔区段出现了不必要的弯曲——这是访问表强制探索特性的副作用，在安全区域仍维持了过高的探索压力。
+PSO、GA、MSA 和 AHA 的终态轨迹整体较为接近，均沿主对角线方向穿越障碍物分布区，并在中段绕开多个圆形障碍物。其中 PSO 的最终时间为 77.70 s，最小无人机间距为 19.11 m；GA 的最终时间为 81.00 s，最小无人机间距为 19.77 m；MSA 和 AHA 的最终时间均为 77.60 s，最小无人机间距分别为 18.79 m 和 19.83 m。可以看出，这几类算法均能够完成任务，但中段和终点附近的僚机轨迹存在一定程度的队形展开，说明局部避障修正对编队结构仍产生了影响。
 
-AL-SHADE（原生）路径在整体形态上与 AHA 接近，但中心瓶颈段更贴近障碍物边缘——current-to-pbest/1 变异策略在此处将搜索引导至距障碍物最近的"激进最优解"，虽然路径长度更短但安全风险更高。TALG 路径在所有七条曲线中表现出最佳的综合性：B 样条参数化使其全程无折角、曲率连续变化；威胁驱动的 Lévy 态在瓶颈区域产生的大幅跳跃使路径选择了更安全的绕行路线而非贴边通过；档案去重保持了搜索多样性，避免了向单一激进解的过度收敛。
+ACOR 的轨迹最为曲折，最终到达时间为 86.50 s，是七种算法中最长的一类。其全局路径在中部区域出现明显弯折，导致领航者和僚机在多个障碍物之间产生额外绕行，虽然最终未发生碰撞，但任务效率相对较低，且最小无人机间距仅为 18.12 m。该现象与前文五指标中 ACOR 路径长度最长、到达时间最长的结果一致。
+
+原生 AL-SHADE 的终态轨迹最短、到达最快，最终时间为 70.60 s。但从图中可以看出，其全局路径在若干障碍物之间选择了较直接的穿越方式，僚机轨迹在局部区域需要依靠 APF 进行一定横向修正，最终最小无人机间距为 18.88 m。AL-SHADE-TALG-QU 的最终时间为 73.00 s，略慢于原生 AL-SHADE，但其最小无人机间距提升至 20.38 m，是图示结果中最高的安全裕度。与此同时，AL-SHADE-TALG-QU 的全局路径和领航者轨迹更加平滑，僚机轨迹之间保持较稳定的相对间隔，体现出 B 样条参数化和威胁感知机制对轨迹连续性与编队安全性的改善作用。
+
+综合而言，路径可视化结果与五项指标对比相互印证：原生 AL-SHADE 在任务效率上具有优势，AL-SHADE-TALG-QU 则在保持较短路径和较快到达的同时，进一步提升了最小机间距和编队轨迹一致性，更适合安全裕度要求较高的无人机集群任务。
 
 
 == 收敛性分析
@@ -1974,7 +1987,7 @@ AL-SHADE（原生）路径在整体形态上与 AHA 接近，但中心瓶颈段�
     (content: image("figures/msa_fitness_convergence.png", width: 92%), subcaption: [MSA]),
     (content: image("figures/aha_fitness_convergence.png", width: 92%), subcaption: [AHA]),
     (content: image("figures/alshade_fitness_convergence.png", width: 92%), subcaption: [AL-SHADE]),
-    (content: image("figures/alshade_talg2_fitness_convergence.png", width: 92%), subcaption: [AL-SHADE-TALG-QU]),
+    (content: image("figures/alshade_talg2_fitness_convergence.png", width: 60%), subcaption: [AL-SHADE-TALG-QU]),
   ),
   columns: 2,
   caption: [七种算法的适应度收敛曲线],
