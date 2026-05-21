@@ -28,7 +28,7 @@ Simulation experiments are conducted in a two-dimensional, multi-obstacle enviro
   ],
   keywords-en: ("UAV swarm", "path planning", "multi-obstacle environment", "Mantis Search Algorithm", "AL-SHADE", "Artificial Potential Field"),
   appendix: [
-     == 伪代码汇总
+     /* == 伪代码汇总
 
     本附录汇总正文中引用或涉及的主要算法伪代码，算法编号与正文引用保持一致。
 
@@ -409,7 +409,7 @@ Simulation experiments are conducted in a two-dimensional, multi-obstacle enviro
         [$bold(P)[0] arrow bold(c)_0$, $quad bold(P)[-1] arrow bold(c)_m$],
       ),
       [*return* $bold(P)$],
-    ) <alg:bspline-gen> 
+    ) <alg:bspline-gen>  */
   ],
   acknowledgement: [
     在最后的最后我要感谢xxx,感谢xxx在我的学业
@@ -1249,7 +1249,7 @@ T_i = cases(
 
 /* *B 样条感知对齐。* 威胁度的计算基于 B 样条曲线采样点而非控制点，这一点至关重要。若直接对控制点计算净空距离，可能出现"控制点均安全、但控制点之间的 B 样条曲线段紧贴障碍物"的漏判情况——这正是原生方法在评估函数与优化变量之间存在表征鸿沟的体现。将 100 个 B 样条采样点投入广播距离计算虽然在单次威胁评估中引入了 $O(100 dot |cal(O)|)$ 的额外开销，但其带来的安全收益——避免优化器产出外观安全实则贴障的虚假可行路径——在障碍物密集场景中远超计算代价。
 
-种群威胁度 $T_i$ 的计算与 B 样条曲线生成紧密耦合——威胁评估的输入并非原始控制点而是光滑采样点，保证了风险评估与路径实际几何的一致性。完整威胁度量化流程见 */#algorithm-ref(<alg:threat-quant>)。
+种群威胁度 $T_i$ 的计算与 B 样条曲线生成紧密耦合——威胁评估的输入并非原始控制点而是光滑采样点，保证了风险评估与路径实际几何的一致性。完整威胁度量化流程见 */
 
 
 === 威胁驱动的 Lévy-高斯双态变异缩放因子
@@ -1383,7 +1383,6 @@ $ <bspline-sampled-path>
 
 这种参数化方式有两个直接好处。其一，B 样条曲线本身具有连续性，可以明显减少折线路径中的急转和曲率突变，使路径更容易满足无人机飞行约束。其二，每个控制点只影响有限的局部曲线段，优化器调整单个控制点时不容易引起全局路径剧烈震荡，因此差分变异和交叉操作更容易生成可接受的试验向量。
 
-B 样条路径参数化的完整流程见#algorithm-ref(<alg:bspline-gen>)。
 
 
 *降维效应。* B 样条参数化还可以在保留路径表达能力的同时降低搜索难度。在经典航点编码中，若设置 $N = 20$ 个中间航点，优化维度为 $D = 40$。如果改用少量控制点描述曲线主体形态，需要优化的自由控制点可减少到约 $5 ~ 7$ 个，对应搜索维度降至 $10 ~ 14$。在较低维度下，差分向量 $(bold(x)_(r_1) - bold(x)_(r_2))$ 中的有效信息更集中，交叉操作也更容易保留有意义的路径结构。因此，B 样条不仅改善路径平滑性，也降低了 AL-SHADE 在高维航点空间中的搜索压力。
