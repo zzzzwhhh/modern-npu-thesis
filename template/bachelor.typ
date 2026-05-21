@@ -10,17 +10,17 @@
   abstract: [
     面向城市低空物流、环境监测、灾害救援还有协同侦察这些应用场景，无人机集群需要在多障碍物的环境里面同时去完成路径搜索、队形保持以及在线避障的任务，单机的路径可行并不一定就意味着集群的飞行是安全的：全局路径要是过于曲折就会把僚机的跟随误差放大，而局部避障与编队控制之间的耦合不够充分，又可能会造成队形拉伸、机间距离太小或者出现局部振荡，因此，在复杂障碍物环境下对无人机集群做路径规划，就需要在任务效率、轨迹平滑性、编队稳定性和安全裕度这几者之间去做综合的协调。
 
-针对上面这些问题，本文建立了一个由全局路径规划层、编队控制层和局部避障层所组成的分层耦合框架：全局路径规划层负责去生成从起点到目标点的任务级参考航路，并且把路径长度、平滑性、障碍物风险、通道宽度还有编队保持代价这些因素统一地考虑进去；编队控制层则基于改进之后的一致性协议来描述多无人机之间的协同关系，在存在通信时延和拓扑变化的条件下，仍然维持住虚拟领航者-僚机这种队形；局部避障层被嵌入到飞行执行的过程当中，对全局路径和编队控制指令进行实时的安全修正，这三个层次之间通过参考航点、速度跟踪以及加速度修正相互耦合在一起，使得系统既保留下了全局规划的远距离引导能力，同时又具备了近场障碍物的响应能力，在全局规划层里面，本文复现并且比较了 PSO、ACOR、GA、MSA、AHA 还有AL-SHADE 等算法，并且针对 AL-SHADE 存在的外部档案冗余、对环境风险感知不足以及离散航点连续性比较弱这些问题，提出了 AL-SHADE-TALG-QU 这种改进方法，这种方法通过外部档案的相似度去重来提升历史解的多样性，通过由威胁所驱动的 Lévy-Gaussian 双态缩放因子来加强在障碍物密集区域的跳出能力，再通过 B 样条曲线参数化路径建模来改善轨迹的连续性和可执行性，在局部避障层里面，本文以人工势场法作为基础，加入了切向旋转斥力机制，让无人机在靠近障碍物的时候不单单能够做径向的避让，还能够顺着障碍物的边缘形成一种绕行的趋势，这样一来就降低了局部极小值和目标不可达问题所带来的影响。
+针对上面这些问题，本文建立了一个由全局路径规划层、编队控制层和局部避障层所组成的分层耦合框架：全局路径规划层负责去生成从起点到目标点的任务级参考航路，并且把路径长度、平滑性、障碍物风险、通道宽度还有编队保持代价这些因素统一地考虑进去；编队控制层则基于改进之后的一致性协议来描述多无人机之间的协同关系，在存在通信时延和拓扑变化的条件下，仍然维持住虚拟领航者-僚机这种队形；局部避障层被嵌入到飞行执行的过程当中，对全局路径和编队控制指令进行实时的安全修正，这三个层次之间通过参考航点、速度跟踪以及加速度修正相互耦合在一起，使得系统既保留下了全局规划的远距离引导能力，同时又具备了近场障碍物的响应能力，在全局规划层里面，本文复现并且比较了 PSO、ACO、GA、MSA、AHA 还有AL-SHADE 等算法，并且针对 AL-SHADE 存在的外部档案冗余、对环境风险感知不足以及离散航点连续性比较弱这些问题，提出了 AL-SHADE-TALG-QU 这种改进方法，这种方法通过外部档案的相似度去重来提升历史解的多样性，通过由威胁所驱动的 Lévy-Gaussian 双态缩放因子来加强在障碍物密集区域的跳出能力，再通过 B 样条曲线参数化路径建模来改善轨迹的连续性和可执行性，在局部避障层里面，本文以人工势场法作为基础，加入了切向旋转斥力机制，让无人机在靠近障碍物的时候不单单能够做径向的避让，还能够顺着障碍物的边缘形成一种绕行的趋势，这样一来就降低了局部极小值和目标不可达问题所带来的影响。
 
 仿真实验是在二维多障碍物环境当中进行的，本文把不同方法从路径长度、平滑度、规划成功率、收敛迭代次数还有队形保持误差这些指标上做了比较，实验的结果表明，经过改进之后的 AL-SHADE 在路径平滑性、编队稳定性还有无人机之间的安全裕度这些方面是具有优势。
   ],
   keywords: ("无人机集群","路径规划；多障碍物环境；螳螂搜索算法；AL-SHADE；人工势场法"),
   abstract-en: [
-    For application scenarios such as urban low-altitude logistics, environmental monitoring, disaster rescue, and collaborative reconnaissance, UAV swarms need to simultaneously perform path searching, formation keeping, and online obstacle avoidance in environments with multiple obstacles. A feasible path for a single UAV does not necessarily mean that the swarm's flight is safe: if the global path is too tortuous, it will amplify the following errors of the wingmen, while insufficient coupling between local obstacle avoidance and formation control may cause formation stretching, excessively small inter-UAV distances, or local oscillations. Therefore, path planning for UAV swarms in complex obstacle environments requires a comprehensive trade-off among task efficiency, trajectory smoothness, formation stability, and safety margins.
+    For applications such as urban low-altitude logistics, environmental monitoring, disaster relief, and collaborative reconnaissance, drone swarms must simultaneously perform path searching, formation maintenance, and online obstacle avoidance in environments with multiple obstacles. A feasible path for a single drone does not necessarily guarantee safe flight for the entire swarm: overly convoluted global paths can amplify following errors among follower drones, while insufficient coupling between local obstacle avoidance and formation control may lead to formation stretching, excessive inter-drone distances, or local oscillations. Therefore, path planning for drone swarms in complex obstacle environments requires a comprehensive coordination among mission efficiency, trajectory smoothness, formation stability, and safety margins. 
 
-To address these issues, this paper establishes a hierarchical coupling framework consisting of a global path planning layer, a formation control layer, and a local obstacle avoidance layer. The global path planning layer is responsible for generating a mission-level reference route from the starting point to the target point, and it uniformly considers factors such as path length, smoothness, obstacle risk, passage width, and formation keeping cost. The formation control layer describes the cooperative relationships among multiple UAVs based on an improved consensus protocol, maintaining the virtual leader-wingman formation under conditions with communication delays and topology changes. The local obstacle avoidance layer is embedded into the flight execution process, performing real-time safety corrections on the global path and formation control commands. These three layers are coupled with one another through reference waypoints, velocity tracking, and acceleration correction, allowing the system to retain the long-distance guidance capability of global planning while also possessing the ability to respond to nearby obstacles. Within the global planning layer, this paper reproduces and compares algorithms such as PSO, ACOR, GA, MSA, AHA, and the traditional AL-SHADE. In view of the problems that occur when AL-SHADE is directly applied to waypoint optimization—such as external archive redundancy, insufficient perception of environmental risk, and weak continuity of discrete waypoints—an improved method, AL-SHADE-TALG-QU, is proposed. This method enhances the diversity of historical solutions through external archive similarity-based deduplication, strengthens the ability to escape from obstacle-dense regions via a threat-driven Lévy-Gaussian dual-state scaling factor, and improves trajectory continuity and executability through B-spline curve parameterized path modeling. In the local obstacle avoidance layer, this paper takes the artificial potential field method as its basis and adds tangential rotational repulsion and a look-ahead predictive deceleration mechanism, so that when a UAV approaches an obstacle, it can not only perform radial avoidance but also form a tendency to detour along the obstacle's edge, thus reducing the impact of local minima and goal non-reachable problems.
+To address the aforementioned issues, this paper proposes a hierarchical coupled framework consisting of a global path planning layer, a formation control layer, and a local obstacle avoidance layer. The global path planning layer generates task-level reference trajectories from start to goal, integrating considerations such as path length, smoothness, obstacle risk, channel width, and formation maintenance cost. The formation control layer employs an improved consensus protocol to model cooperative relationships among multiple drones, maintaining a virtual leader-follower formation even under communication delays and dynamic topology changes. The local obstacle avoidance layer is embedded within the flight execution process, providing real-time safety corrections to both the global path and formation control commands. These three layers are mutually coupled through reference waypoints, velocity tracking, and acceleration adjustments, enabling the system to retain long-range guidance capabilities from global planning while also responding effectively to nearby obstacles. Within the global planning layer, this study reproduces and compares several algorithms including PSO, ACO, GA, MSA, AHA, and AL-SHADE. To address AL-SHADE's shortcomings—such as redundant external archives, insufficient environmental risk perception, and weak continuity between discrete waypoints—a novel improvement named AL-SHADE-TALG-QU is proposed. This method enhances solution diversity by deduplicating similar entries in the external archive, strengthens exploration capability in obstacle-dense regions using a threat-driven Lévy-Gaussian dual-state scaling factor, and improves trajectory continuity and feasibility via B-spline curve-based path parameterization. In the local obstacle avoidance layer, an artificial potential field approach is adopted, augmented with a tangential rotational repulsion mechanism that enables drones not only to perform radial avoidance when approaching obstacles but also to follow the obstacle edges and navigate around them, thereby mitigating the impact of local minima and unreachable goals. 
 
-The simulation experiments were conducted in a two-dimensional environment with multiple obstacles. In this two-dimensional multi-obstacle environment, this paper compares different methods in terms of indicators such as path length, smoothness, planning success rate, convergence iteration count, and formation keeping error. The experimental results indicate that the improved AL-SHADE demonstrates advantages in path smoothness, formation stability, and safety margins between UAVs, while also performing better in global optimization and local obstacle avoidance capabilities.
+The simulation experiments were conducted in a two-dimensional environment with multiple obstacles. This paper compares different methods based on metrics such as path length, smoothness, planning success rate, number of convergence iterations, and formation maintenance error. The experimental results show that the improved AL-SHADE outperforms others in terms of path smoothness, formation stability, and safety margin among drones.
   ],
   keywords-en: ("UAV swarm", "path planning", "multi-obstacle environment", "Mantis Search Algorithm", "AL-SHADE", "Artificial Potential Field"),
   appendix: [
@@ -212,28 +212,50 @@ PSO 的执行过程可以被描述为下面这样：首先，依据起点、终�
 
 === 蚁群算法（ACO）设计与实现
 
-经典蚁群算法通常用于离散图搜索。无人机路径规划属于连续航点优化问题，所以本文采用连续域蚁群优化思想，将信息素模型表示为解档案上的高斯核采样。设档案容量为 $K$，档案中第 $l$ 个解为 $bold(s)_l$，其适应度为 $J_l$。档案按适应度从小到大排序后，较优解获得更高采样概率：
+基本蚁群算法通常被用在离散图的搜索里面，它的核心是依靠信息素的强度还有启发式因子，来决定一只蚂蚁从当前的节点转移到下一个节点的概率，对于蚂蚁 $k$ 来说，它从节点 $i$ 转移到被允许访问的节点 $j$ 的概率，一般会被写成下面这个样子：
 
 $
-omega_l = frac(1, q K sqrt(2 pi)) exp lr(- frac((l - 1)^2, 2 q^2 K^2)), quad
+p_(i j)^k = frac(tau_(i j)^alpha eta_(i j)^beta, sum_(l in "allowed"_k) tau_(i l)^alpha eta_(i l)^beta)
+$
+
+在这个式子里，$tau_(i j)$ 是边 $(i,j)$ 上面的信息素强度，$eta_(i j)$ 是启发式因子，$alpha$ 和 $beta$ 分别用来表示信息素和启发式因子各自的重要程度，在一次迭代结束以后，信息素通常会按照挥发和增量这两种方式来进行更新：
+
+$
+tau_(i j)(t+1) = (1-rho) tau_(i j)(t) + Delta tau_(i j)(t), quad
+Delta tau_(i j)(t) = sum_(k=1)^m Delta tau_(i j)^k
+$
+
+这里面，$rho$ 是信息素的挥发率，$Delta tau_(i j)^k$ 所表示的是第 $k$ 只蚂蚁在边 $(i,j)$ 上所释放出来的信息素量，它常见的一种定义是
+
+$
+Delta tau_(i j)^k = cases(
+  Q / L_k quad "if ant " k " used edge " (i,j),
+  0 quad "otherwise"
+)
+$
+
+/* 本文在无人机路径规划里采用的是连续航点编码，候选解是直接处在实数的坐标空间当中的，并不存在固定的离散边 $(i,j)$，所以这里并不直接去使用基本 ACO 的状态转移概率，而是采用了连续域的蚁群优化算法 ACO，ACO 把信息素模型转化成了建立在解档案上面的高斯核采样，通过档案里优质解的排序权重来引导新解的产生，设档案的容量为 $K$，档案当中第 $l$ 个解是 $bold(s)_l$，它的适应度为 $J_l$，档案按照适应度从小到大排好序以后，较优的解就能获得更高的采样概率：
+
+$
+omega_l = frac(1, q K sqrt(2 pi)) exp(lr(- frac((l - 1)^2, 2 q^2 K^2))), quad
 p_l = frac(omega_l, sum_(h=1)^K omega_h)
 $
 
-其中 $q$ 控制选择压力。每只蚂蚁先按概率 $p_l$ 选择引导解，再围绕该解进行高斯采样：
+在这里 $q$ 是用来控制选择压力的，每一只蚂蚁先按照概率 $p_l$ 去选择一个引导解，然后再围绕这个解去做高斯采样：
 
 $
 X_j^"new" = s_(l,j) + cal(N)(0, sigma_j^2)
 $
 
-标准差 $sigma_j$ 根据档案中同一维度的离散程度确定，通常写为
+标准差 $sigma_j$ 是根据档案里面同一个维度上的离散程度来确定的，它通常被写成
 
 $
 sigma_j = xi frac(1, K-1) sum_(h=1, h != l)^K |s_(h,j) - s_(l,j)|
 $
 
-其中 $xi$ 为搜索尺度参数。新解生成后需要裁剪边界、解码为路径并计算适应度，再与原档案合并排序，保留前 $K$ 个解。
+式子里面的 $xi$ 是搜索尺度的参数，新的解生成之后还需要去裁剪边界、把它解码成路径并且计算出适应度，然后再和原来的档案合并在一起重新排序，只把排在前面的 $K$ 个解保留下来。 */
 
-蚁群算法的执行过程可以被概括为下面这样：首先，在带状的搜索空间里面生成一批初始的候选路径，并且按照适应度把这些路径排好顺序，建立起一个解档案；随后，依据档案里各个解的排序位置，去算出高斯核权重和选择概率，这就让质量比较好的路径能够获得更高的采样概率；然后，每一只蚂蚁都会按照概率从档案里挑选出一个引导解，再根据档案的分布情况去计算出各个维度的采样标准差；在这之后，把引导解当作中心来进行高斯采样，由此生成新的航点编码，同时对那些越界的部分进行修正处理；再然后，计算出新路径的适应度，把它和原来的档案合并到一起重新排序，只保留排在前面的K 个较优解；像这样的过程会被反复执行，一直等到迭代次数达到最大值才停止，最后输出档案里适应度最小的那一条路径，作为全局规划的结果。
+ACO 的执行过程可以被概括为下面这样：首先，在带状的搜索空间里面去生成一批初始的候选路径，并且按照适应度把这些路径排好顺序，由此建立起一个解档案；随后，依据档案里面各个解的排序位置，去算出高斯核权重和选择概率，这样一来质量比较好的路径就能够获得更高的采样概率；然后，每一只蚂蚁都会按照概率从档案里面去挑选出一个引导解，再根据档案的分布情况去计算出各个维度的采样标准差；在这之后，把引导解当作中心来进行高斯采样，由此生成新的航点编码，同时也对那些越界的部分做出修正处理；再然后，计算出新路径的适应度，把它和原来的档案合并到一起重新进行排序，只把排在前面的 $K$ 个较优解保留下来；像这样的过程会被反复地执行，一直等到迭代次数达到了最大值才停下来，最后把档案里面适应度最小的那一条路径输出，作为全局规划的结果。
 
 === 遗传算法（GA）设计与实现
 
@@ -729,22 +751,21 @@ $
 
 == 局部避障算法设计与实现
 
+传统人工势场法是局部避障里面比较经典的一类方法，它是由 Khatib 在 1986 年提出来的，它的基本思想是在无人机所处的工作空间当中去构造一个虚拟的势场：目标点会产生吸引势，让无人机朝着任务目标或者当前的参考航点去运动；障碍物则会产生排斥势，使无人机在靠近障碍物的时候受到一种远离障碍物的作用，无人机的运动方向是由吸引力和斥力的合力共同来决定的，所以这种方法可以在不重新去做全局规划的情况下，根据当前的位置和与障碍物之间的距离快速地生成避障的修正量。
 
-传统人工势场法是局部避障中比较经典的一类方法，由 Khatib 在 1986 年提出。它的基本思想是在无人机所处的工作空间中构造一个虚拟势场：目标点产生吸引势，使无人机朝着任务目标或当前参考航点运动；障碍物产生排斥势，使无人机在接近障碍物时受到远离障碍物的作用。无人机的运动方向由吸引力和斥力的合力共同决定，因此该方法能够在不重新进行全局规划的情况下，根据当前位置和障碍物距离快速生成避障修正量。
-
-设无人机当前位置为 $bold(p)_i$，目标航点为 $bold(p)_("tgt")$，障碍物中心为 $bold(c)_O$，障碍物影响距离为 $d_0$，无人机到障碍物表面的距离记为 $d_O = norm(bold(p)_i - bold(c)_O) - R_O$。传统 APF 通常把目标引力势函数写成
+设无人机当前的位置为 $bold(p)_i$，目标的航点为 $bold(p)_("tgt")$，障碍物的中心为 $bold(c)_O$，障碍物的影响距离为 $d_0$，无人机到障碍物表面的距离则记为 $d_O = norm(bold(p)_i - bold(c)_O) - R_O$，传统的 APF 通常会把目标引力的势函数写成下面这种形式
 
 $
 U_("att")(bold(p)_i) = frac(1, 2) k_("att") norm(bold(p)_i - bold(p)_("tgt"))^2
 $
 
-对应的目标引力为
+和它相对应的目标引力就是
 
 $
 bold(f)_("att") = - nabla U_("att") = k_("att") (bold(p)_("tgt") - bold(p)_i)
 $
 
-障碍物斥力势函数一般写成分段形式：
+障碍物斥力的势函数一般会被写成分段的形式：
 
 $
 U_("rep")(bold(p)_i) = cases(
@@ -753,7 +774,7 @@ U_("rep")(bold(p)_i) = cases(
 )
 $
 
-由此得到的斥力为
+由这个势函数所得到的斥力就是
 
 $
 bold(f)_("rep") = cases(
@@ -762,55 +783,53 @@ bold(f)_("rep") = cases(
 )
 $
 
-因此，传统 APF 给出的局部避障合力可以表示为
+这样一来，传统 APF 所给出的局部避障合力就可以被表示成
 
 $
 bold(f)_("APF") = bold(f)_("att") + sum_(O in cal(O)) bold(f)_("rep", O)
 $
 
-从实现角度看，传统 APF 的结构比较直观，计算量也较小，适合嵌入无人机的在线控制回路中。当无人机远离障碍物时，障碍物斥力趋近于零，运动主要由目标引力和编队控制决定；当无人机进入障碍物影响范围时，斥力逐渐增大，对原有运动方向进行修正，从而降低碰撞风险。也正因为这种实时性较强、实现简单的特点，人工势场法常被作为局部避障层的基础方法，与编队控制层配合使用。
+从实现的角度来看，传统 APF 的结构是比较直观的，计算量也比较小，很适合被嵌入到无人机的在线控制回路里面去，当无人机离障碍物比较远的时候，障碍物的斥力会趋近于零，这时候运动就主要是由目标引力和编队控制来决定的；而当无人机进入到障碍物的影响范围里面的时候，斥力就会逐渐地增大，对原来的运动方向做出修正，这样一来碰撞的风险就被降低了，也正是因为这种实时性比较强、实现又比较简单的特点，人工势场法常常被拿来作为局部避障层的基础方法，和编队控制层配合在一起使用。
 
 == 编队综合控制律与局部避障约束
 
-在传统 APF 接入编队控制回路之后，每一架无人机 $i$ 在控制周期 $Delta t$ 内接收到的控制量可以看成由两部分组成：一部分是编队一致性控制给出的加速度指令 $bold(u)_i^("cons")$，它主要负责维持多机之间的相对位置关系；另一部分是传统人工势场法给出的局部势场合力 $bold(f)_("APF")$，它同时包含目标引力和障碍物斥力，用来引导无人机朝参考航点运动并远离障碍物。因此，传统 APF 条件下的综合控制律可以写成
+在把传统 APF 接入到编队控制回路里面之后，每一架无人机 $i$ 在一个控制周期 $Delta t$ 内所接收到的控制量，就可以看成是由两部分组成的：一部分是编队一致性控制所给出的加速度指令 $bold(u)_i^("cons")$，它主要是负责去维持多机之间的相对位置关系；另一部分则是由传统人工势场法所给出的局部势场合力 $bold(f)_("APF")$，它同时包含了目标引力和障碍物斥力，被用来引导无人机朝着参考航点去运动并且远离障碍物，所以，在传统 APF 的条件下，综合控制律就可以写成
 
 $
 bold(u)_i^("cmd") = bold(u)_i^("cons") + bold(f)_("APF") $ <integrated-control>
 
-其中，$bold(u)_i^("cons")$ 由前文的改进一致性协议得，$bold(f)_("APF")$ 由目标引力 $bold(f)_("att")$ 和障碍物斥力 $bold(f)_("rep")$ 叠加得到。这样处理后，编队控制层负责保持集群结构，传统 APF 层负责提供面向目标和避开障碍物的局部修正，两者通过加速度指令在同一个控制周期内叠加。
+在这个式子里，$bold(u)_i^("cons")$ 是由前面改进过的一致性协议所得到的，$bold(f)_("APF")$ 则是由目标引力 $bold(f)_("att")$ 和障碍物斥力 $bold(f)_("rep")$ 叠加起来得到的，经过这样处理之后，编队控制层负责去保持集群的结构，传统 APF 层则负责提供面向目标以及避开障碍物的局部修正，这两者通过加速度指令在同一个控制周期里面叠加在一起。
 
-在输出给自动驾驶仪之前，综合加速度指令还需要满足无人机自身的动力学约束。首先进行速度约束校验，根据当前速度和控制周期预估下一时刻速度：
+在把它输出给自动驾驶仪之前，综合之后的加速度指令还需要去满足无人机自身的动力学约束，先来做速度约束的校验，根据当前的速度和控制周期去预估下一个时刻的速度：
 
 $
 bold(v)_i(t + Delta t) = bold(v)_i(t) + bold(u)_i^("cmd") Delta t
 $
 
-如果 $norm(bold(v)_i(t + Delta t)) > v_("max")$，则先把预测速度缩放到最大速度边界上，再由受限后的速度反算可行加速度：
+如果 $norm(bold(v)_i(t + Delta t)) > v_("max")$，那就先把预估的速度缩放到最大速度的边界上面，再由受到限制之后的速度去反算出可行的加速度：
 
 $
 bold(v)_i^("lim") = frac(v_("max"), norm(bold(v)_i(t + Delta t))) bold(v)_i(t + Delta t), quad
 bold(u)_i^("cmd") arrow frac(bold(v)_i^("lim") - bold(v)_i(t), Delta t)
 $
 
-随后进行加速度约束校验，如果 $norm(bold(u)_i^("cmd")) > a_("max")$，则将控制指令按比例缩放到可行范围内：
+接下来再做加速度约束的校验，如果 $norm(bold(u)_i^("cmd")) > a_("max")$，那就把控制指令按照比例缩放到可行的范围里面：
 
 $
 bold(u)_i^("cmd") arrow frac(a_("max"), norm(bold(u)_i^("cmd"))) bold(u)_i^("cmd")
 $
 
-经过速度和加速度两级限制之后，控制量再通过@eqt:control-to-autopilot 转换为自动驾驶仪能够执行的速度指令。由此，传统 APF 局部避障力并不是单独作用于无人机，而是与编队一致性控制一起构成闭环控制输入，并在动力学约束映射之后参与实际飞行。
-
-
+在经过了速度和加速度这两级的限制之后，控制量再通过@eqt:control-to-autopilot 转换成自动驾驶仪可以去执行的速度指令，这样看来，传统 APF 的局部避障力并不是单独地去作用在无人机上，而是和编队一致性控制一起构成了闭环的控制输入，并且在经过了动力学约束的映射之后才参与到实际的飞行当中。
 
 == 分层耦合任务执行框架
 
-前文已经分别把编队控制模型、全局路径规划算法还有传统 APF 局部避障方法的基本思想建立了起来，在实际执行任务的时候，这三个部分并不是彼此独立地在运行，而是在同一个闭环里面分层地进行配合，全局规划层会先给出从起点到目标点的参考航路，编队控制层再把这条航路转化成多无人机协同飞行当中的队形保持指令；当飞行过程里遇到了近场的障碍物，局部避障层就会依据目标引力和障碍物斥力对控制指令做出实时修正，经过这样的处理以后，系统既可以把全局路径的整体质量保留下来，也能够兼顾到编队的稳定性和局部的飞行安全。
+前文已经分别把编队控制模型、全局路径规划算法还有传统 APF 局部避障方法的基本思想建立了起来，在实际执行任务的时候，这三个部分并不是彼此独立地在运行，而是在同一个闭环里面分层地去进行配合，全局规划层会先给出从起点到目标点的参考航路，编队控制层再把这条航路转化成多无人机协同飞行当中的队形保持指令；当飞行过程里遇到了近场的障碍物，局部避障层就会根据目标引力和障碍物斥力对控制指令做出实时的修正，经过这样的处理以后，系统既可以把全局路径的整体质量保留下来，也能够兼顾到编队的稳定性和局部的飞行安全。
 
-在任务开始的时候，系统先把起点、目标点、障碍物的分布、无人机的数量还有期望的编队构型这一类先验信息输入进去，全局路径规划算法在统一适应度函数的限制下面去搜索航点序列，并且生成一条面向领航者的全局参考路径，在这之后，领航者就沿着参考路径逐步地去跟踪当前的目标航点；而其余的跟随者则根据期望的相对位移、邻接拓扑还有一致性控制律来生成编队保持的控制量，让集群在整体运动的过程当中尽可能地去维持预设的队形。
+在任务开始的时候，系统会先把起点、目标点、障碍物的分布、无人机的数量还有期望的编队构型这一类先验信息输入进去，全局路径规划算法在统一适应度函数的限制下面去搜索航点序列，并且生成一条面向领航者的全局参考路径，在这之后，领航者就沿着参考路径逐步地去跟踪当前的目标航点；而其余的跟随者则根据期望的相对位移、邻接拓扑还有一致性控制律来生成编队保持的控制量，让集群在整体运动的过程当中尽可能地去维持预设的队形。
 
-进入到飞行执行阶段以后，局部避障层会以一个比较高的控制频率嵌入到编队控制回路里面，如果无人机进入障碍物的影响范围，APF 模块就会根据目标方向和障碍物距离计算安全修正量；要是周围的环境比较安全，局部避障项就会趋近于零，这个时候系统就主要是由全局路径跟踪和编队保持控制来主导。换句话说，局部避障并不是要去替代全局规划，而是在保持任务方向的基础上面提供必要的安全偏置；至于如何进一步增强 APF 的绕行能力和动态安全裕度，将在下一章的算法改进部分展开。
+进入到飞行执行阶段以后，局部避障层会以一个比较高的控制频率嵌入到编队控制回路里面，如果无人机进入了障碍物的影响范围，APF 模块就会根据目标的方向和障碍物的距离去算出安全的修正量；要是周围的环境比较安全，局部避障项就会趋近于零，这个时候系统就主要是由全局路径跟踪和编队保持控制来主导，换句话说，局部避障并不是要去替代全局规划，而是在保持任务方向的基础上面去提供必要的安全偏置；至于怎么样去进一步增强 APF 的绕行能力和动态安全裕度，这将在下一章的算法改进部分去展开。
 
-从任务执行的角度来看，可以把整个流程理解成这样：全局规划先确定一个大致的飞行方向，编队控制负责去维持多机的结构，局部避障则在出现风险的时候进行短时间的修正。全局规划层对路径长度、到达时间还有平滑性产生影响；编队控制层会影响队形误差和机间安全裕度；局部避障层关系到集群在面对近场障碍物扰动时能不能够及时调整。后续算法改进将分别围绕全局路径搜索和局部避障修正展开，并最终通过同一个分层耦合框架反映到无人机集群任务的整体表现上面。具体流程见下图所示：
+从任务执行的角度来看，可以把整个流程理解成这样：全局规划先确定一个大致的飞行方向，编队控制负责去维持多机的结构，局部避障则在出现风险的时候进行短时间的修正，全局规划层对路径长度、到达时间还有平滑性产生影响；编队控制层会影响队形误差和机间的安全裕度；局部避障层关系到的则是集群在面对近场障碍物扰动的时候能不能够及时地做出调整，后续算法的改进将会分别围绕全局路径搜索和局部避障修正来展开，并且最终通过同一个分层耦合框架去反映到无人机集群任务的整体表现上面，具体的流程见下图所示：
 
 #capfig(
   image("figures/分层耦合.png", width: 73%),
@@ -820,11 +839,11 @@ $
 
 == 本章小结
 
-本章主要完成了无人机集群路径规划任务里面的模型构建工作，首先，针对多无人机协同飞行的问题，建立了建立在虚拟领航者基础上的编队控制模型，并且用邻接矩阵和拉普拉斯矩阵去描述无人机相互之间的通信关系，在这个基础之上，给出了把位置误差、速度误差还有通信时延都考虑进去的一致性控制律，与此同时加进了速度、加速度和航向角速率等方面的限制，这样就使编队控制的结果能够更加符合无人机实际运动的条件。
+本章主要完成了无人机集群路径规划任务里面的模型构建工作，首先，针对多无人机协同飞行的问题，建立了建立在虚拟领航者基础上的编队控制模型，并且用邻接矩阵和拉普拉斯矩阵去描述无人机相互之间的通信关系，在这个基础之上，给出了把位置误差、速度误差还有通信时延都考虑进去的一致性控制律，与此同时加进了速度、加速度和航向角速率等方面的限制，这样一来就使编队控制的结果能够更加符合无人机实际运动的条件。
 
-然后，本章介绍了传统人工势场法在局部避障中的基本思想，说明目标引力和障碍物斥力对无人机编队模型的产生怎样影响。传统 APF 具有结构简单、实时性较好的优点，可以作为局部避障层的基础模型；但它在复杂障碍物附近也容易出现局部极小值和绕行能力不足等问题，因此仍需要在后续章节中进一步改进。
+然后，本章介绍了传统人工势场法在局部避障当中的基本思想，说明了目标引力和障碍物斥力对无人机编队模型会产生怎样的影响，传统 APF 的优点在于结构比较简单、实时性也比较好，可以作为局部避障层的一个基础模型；但是它在复杂障碍物的附近也容易出现局部极小值和绕行能力不够这些问题，所以还是需要在后续的章节里面去做进一步的改进。
 
-最后，本章说明了全局规划、编队控制还有局部避障相互之间的耦合关系，全局路径为领航者提供参考航路，编队控制把这条航路转化为多机的协同运动，局部避障则在近场风险出现的时候对控制指令进行修正，这三者一起构成了完整的任务执行框架。由此可以看出来，全局规划路径的质量会继续影响队形保持和局部避障的效果，传统 APF 的局限也会影响局部安全修正的可靠性，所以下一章将围绕编队路径规划算法和局部避障算法展开改进，以提高复杂障碍物环境下的路径连续性、安全性以及编队适应性。
+最后，本章说明了全局规划、编队控制还有局部避障相互之间的耦合关系，全局路径为领航者提供参考航路，编队控制把这条航路转化为多机的协同运动，局部避障则在近场风险出现的时候对控制指令进行修正，这三者一起构成了完整的任务执行框架，由此可以看出来，全局规划路径的质量会继续影响队形保持和局部避障的效果，传统 APF 的局限也会影响到局部安全修正的可靠性，所以下一章将会围绕编队路径规划算法和局部避障算法去展开改进，以此来提高在复杂障碍物环境下面的路径连续性、安全性以及编队适应性。
 
 
 = 编队避障和全局规划算法的改进
@@ -833,10 +852,10 @@ $
 
 == 改进人工势场法
 
-传统人工势场法也存在比较明显的局限。首先，在“U 型”障碍物、狭窄通道或者障碍物分布比较密集的区域中，吸引力和斥力的合力可能接近零，使无人机陷入局部极小值，表现为停滞、振荡或者反复绕行。再次，传统 APF 的斥力方向通常沿障碍物到无人机的径向方向，缺少主动绕行的切向引导能力，在多机编队场景中还容易和队形保持控制产生耦合冲突。因此，本节主要从斥力场建模这个方面来对传统 APF 进行改进，以此来增强无人机在复杂障碍物环境下的避障能力。
+传统人工势场法也存在比较明显的局限，首先，在“U 型”障碍物、狭窄通道或者障碍物分布比较密集的区域当中，吸引力和斥力的合力有可能接近零，这就会让无人机陷入局部极小值，表现出来的就是停滞、振荡或者反复绕行，再一个，传统 APF 的斥力方向通常是沿着从障碍物到无人机的径向方向的，它缺少一种主动绕行的切向引导能力，而且在多机编队的场景里还容易和队形保持控制产生耦合冲突，因此，这一节主要是从斥力场建模这个方面来对传统 APF 做出改进，以此来增强无人机在复杂障碍物环境下面的避障能力。
 
 === 障碍物斥力场的切向旋转增强 
-在障碍物斥力场的切向旋转增强这一部分，经典 APF 的斥力方向是严格地沿着从障碍物中心指向无人机的径向线的，当无人机、障碍物和目标大致处在同一条直线上的时候，合力的方向也主要落在这条直线上，这样就很难自然地产生绕行的动作，为了解决这个问题，本文在径向斥力之外又加入了一个切向旋转分量，从而形成一个矢量复合斥力场。
+在障碍物斥力场的切向旋转增强这一部分，经典 APF 的斥力方向是严格地沿着从障碍物中心指向无人机的径向线的，当无人机、障碍物和目标大致处在同一条直线上的时候，合力的方向也主要落在这条直线上，这样就很难自然地产生绕行的动作，为了解决这个问题，本文在径向斥力之外又加入了一个切向旋转分量，从而形成了一个矢量复合斥力场。
 
 设无人机 $i$ 当前的位置为 $bold(p)_i = (x_i, y_i)^T$，速度矢量为 $bold(v)_i = (v_(x i), v_(y i))^T$，对于当前探测范围内的障碍物，先把距离无人机最近的那一个障碍物 $O^"*"$ 筛选出来，这里用间隙距离 $d = norm(bold(p)_i - bold(c)_("obs")) - R_("obs")$ 来作为度量，其中 $bold(c)_("obs")$ 和 $R_("obs")$ 分别代表障碍物的中心和半径，斥力的作用范围被定义成 $d_("inf") = R_("obs") + d_("safe") + 50$，这里的 $d_("safe")$ 是预先设置好的安全距离，本文把它取为 20 m，当 $d >= d_("inf")$ 的时候斥力为零；而当 $d < d_("inf")$ 的时候，斥力就由径向分量 $bold(f)_("rad")$ 和切向分量 $bold(f)_("tan")$ 合成在一起。
 
@@ -893,14 +912,14 @@ bold(u)_("nav") = dot(bold(v))_("ref") - k_3 thin (bold(v)_i - bold(v)_("ref")^(
 前视预测参数取的是 $T_h = 5.0$ s、$N_s = 25$，这对应着大约 0.2 s 每段的时间分辨率，在 80 m/s 的速度下面，它的空间分辨率大约是 16 m 每段，这样就可以提前一到两个预测段去发现前方的障碍物，减速阈值 $d_("slow") = 2.5 d_("safe") = 50$ m 和下限 $lambda_("min") = 0.2$ 配合在一起使用，可以让无人机在进入到安全缓冲区之前就开始减速，从而避免高速冲进紧急避让区之后，因为机动能力不足而没办法及时转向的情况。 */
 
 
-在实际执行的时候，改进人工势场法并不是单独替代编队控制器，而是作为局部安全修正项嵌入到已有的编队控制回路当中。每一架无人机 $i$ 在每一个控制周期 $Delta t = 0.1$ s 内，都会接收来自三个功能通道的加速度指令：编队一致性控制通道、目标引力以及障碍物避让通道。三者采用加性叠加的方式形成最终的控制输入：
+在实际执行的时候，改进之后的人工势场法并不是单独地去替代编队控制器，而是作为局部安全修正的项被嵌入到已有的编队控制回路里面，每一架无人机 $i$ 在每一个控制周期 $Delta t = 0.1$ s 里面，都会接收到来自三个功能通道的加速度指令：编队一致性控制通道、目标引力通道还有障碍物避让通道，这三者采用加性叠加的方式去形成最终的控制输入：
 
 $
 bold(u)_i^("cmd") = bold(u)_i^("cons") + bold(f)_("att")  + bold(f)_("rep") 
 $ <improved-integrated-control>
 
 
-这种叠加方式使改进 APF 可以和分层耦合框架保持一致：当无人机远离障碍物时，$bold(f)_("rep")$ 逐渐趋近于零，运动主要由全局路径跟踪和编队控制决定；当无人机进入障碍物影响范围时，径向斥力负责拉开安全距离，切向斥力负责提供绕行趋势，前视减速因子则降低目标导航速度，避免高速进入狭窄通道。得到 $bold(u)_i^("cmd")$ 之后，仍然按照第三章给出的速度约束和加速度约束进行限幅，再通过@eqt:control-to-autopilot 转换成自动驾驶仪可以执行的速度指令。
+这样一种叠加的方式使得改进之后的 APF 可以和分层耦合框架保持一致：当无人机远离障碍物的时候，$bold(f)_("rep")$ 会逐渐地趋近于零，这时候运动就主要是由全局路径跟踪和编队控制来决定的；而当无人机进入到障碍物影响范围里面的时候，径向斥力负责把安全距离拉开，切向斥力负责提供绕行的趋势，得到了 $bold(u)_i^("cmd")$ 之后，仍然是按照第三章所给出的速度约束和加速度约束去进行限幅，再通过@eqt:control-to-autopilot 转换成自动驾驶仪可以去执行的速度指令。
 
 == 外部档案相似度去重
 
@@ -1072,15 +1091,15 @@ $ <bspline-sampled-path>
 
 == 本章小结
 
-本章围绕编队路径规划算法的执行需求，分别从局部避障机制和全局路径优化两个方面进行了改进。首先，针对传统 APF 在复杂障碍物附近容易出现局部极小值、目标不可达和绕行能力不足的问题，本文加入切向旋转斥力机制，使无人机在靠近障碍物时既能够获得径向安全避让，也能够形成沿障碍物边缘绕行的运动趋势，同时通过综合控制律把编队控制、目标引导和局部避障修正耦合在同一个加速度指令中。
+本章围绕编队路径规划算法的执行需求，分别从局部避障机制和全局路径优化这两个方面去做了改进。首先，针对传统 APF 在复杂障碍物附近比较容易出现局部极小值、目标不可达还有绕行能力不够的问题，本文加入了切向旋转斥力机制，使得无人机在靠近障碍物的时候，既能够获得径向的安全避让，也能够形成一种顺着障碍物边缘绕行的运动趋势，同时通过综合控制律把编队控制、目标引导还有局部避障修正耦合到了同一个加速度指令里面。
 
-在全局路径优化方面，本章围绕传统基于成功历史参数自适应学习的差分进化算法在无人机路径规划当中的不足，提出了 TALG 改进框架，传统的 AL-SHADE 虽然具有比较好的连续优化能力，但是直接被用到航点规划上的时候仍然存在三个比较明显的问题：外部档案容易积累相似的解，变异参数对障碍物的威胁不够敏感，离散航点编码也容易生成折线式的轨迹，针对这些问题，本章分别从档案维护、搜索步长和路径表达这三个角度去做了改进。
+在全局路径优化这个方面，本章围绕传统基于成功历史参数自适应学习的差分进化算法在无人机路径规划当中的不足，提出了 TALG 这个改进框架，传统的 AL-SHADE 虽然具有比较好的连续优化能力，但是当它被直接用到航点规划上的时候，仍然存在三个比较明显的问题：外部档案容易积累相似的解，变异参数对障碍物的威胁不够敏感，离散航点编码也容易生成折线式的轨迹，针对这些问题，本章分别从档案维护、搜索步长和路径表达这三个角度去做了改进。
 
-首先，外部档案相似度去重机制通过欧氏距离去判断待存入的父代和档案个体之间的相似程度，如果两者过于接近，那就只保留适应度更优的那个代表解；要是差异比较大，那就把它作为新的搜索区域信息写进档案，这样做可以减少重复的历史解对档案均值的干扰，让 current-to-Amean/1 变异策略获得区分度更高的引导方向。
+首先，外部档案相似度去重机制是通过欧氏距离去判断待存入的父代和档案个体之间的相似程度的，如果两者过于接近，那就只把适应度更优的那个代表解保留下来；要是差异比较大，那就把它作为新的搜索区域信息写进档案里面去，这样做就可以减少重复的历史解对档案均值的干扰，让 current-to-Amean/1 变异策略获得区分度更高的引导方向。
 
-然后，本章建立了一个基于障碍物净空距离的种群威胁度模型，并且把它引入到了 Lévy-Gaussian 双态缩放因子的生成过程当中，处在开阔区域的个体更多地采用高斯态小步长去搜索，这样便于细化路径的长度和平滑性；而靠近障碍物或者处在危险通道当中的个体则更容易进入 Lévy 态，通过比较大的步长来跳出局部受限的区域，这样一来，变异的尺度就不再只是依赖于历史的成功经验，它也能够对环境的风险做出响应。
+然后，本章建立了一个基于障碍物净空距离的种群威胁度模型，并且把它引入到了 Lévy-Gaussian 双态缩放因子的生成过程当中，处在开阔区域的个体会更多地采用高斯态小步长去搜索，这样便于去细化路径的长度和平滑性；而靠近障碍物或者处在危险通道当中的个体，则更容易进入到 Lévy 态，通过比较大的步长来跳出局部受限的区域，这样一来，变异的尺度就不再只是依赖于历史的成功经验了，它也能够对环境的风险做出响应。
 
-最后，本章引入了 B 样条曲线来对路径进行参数化建模，优化器不再直接去评价控制点的折线，而是先由控制点生成连续的平滑曲线，再基于曲线的采样点去计算适应度，这种处理方式既能削弱离散航点所带来的急转弯，也能够降低搜索的维度，使得 AL-SHADE 的差分变异更容易产生可执行的路径结构。上述全局规划改进与改进 APF 局部避障共同构成了本文编队路径规划算法改进的核心内容，下一章将会通过仿真实验，从路径形态、收敛曲线还有多项飞行指标上面去检验改进算法的实际效果。
+最后，本章引入了 B 样条曲线来对路径做参数化建模，优化器不再直接去评价控制点的折线，而是先由控制点去生成连续的平滑曲线，然后再基于曲线的采样点去计算适应度，这种处理方式既能削弱离散航点所带来的急转弯，也能够降低搜索的维度，使得 AL-SHADE 的差分变异更容易产出可执行的路径结构。上面所说的全局规划改进与改进之后的 APF 局部避障，共同构成了本文编队路径规划算法改进的核心内容，下一章将会通过仿真实验，从路径形态、收敛曲线还有多项飞行指标这些方面去检验改进算法的实际效果。
 
 = 实验结果分析
 
@@ -1102,7 +1121,7 @@ $ <bspline-sampled-path>
 )[
   | 算法            | 种群/迭代  | 类别             | 关键参数                                        |
   | PSO             | 500 / 500  | 经典群体智能     | $omega = 0.6$, $c_1 = 1.6$, $c_2 = 1.4$          |
-  | ACOR            | 500 / 500  | 经典群体智能     | $K = 20$, $q = 0.1$, $xi = 0.85$                 |
+  | ACO            | 500 / 500  | 经典群体智能     | $K = 20$, $q = 0.1$, $xi = 0.85$                 |
   | GA              | 500 / 500  | 经典进化算法     | $p_m = 0.1$, $sigma_0 = 40$, $k = 3$             |
   | MSA             | 500 / 500  | 新型群体智能     | $P = 2$, $rho = 6$, $a = 0.5$, $P_c = 0.2$       |
   | AHA             | 50 / 500   | 新型群体智能     | 无外部控制参数                                  |
@@ -1133,7 +1152,7 @@ $ <bspline-sampled-path>
 #capsubfig(
   (
     (content: image("figures/lujing/final_snapshot_pso_apf.png", height: 5.2cm, fit: "contain"), subcaption: [PSO + APF]),
-    (content: image("figures/lujing/final_snapshot_aco_apf.png", height: 5.2cm, fit: "contain"), subcaption: [ACOR + APF]),
+    (content: image("figures/lujing/final_snapshot_aco_apf.png", height: 5.2cm, fit: "contain"), subcaption: [ACO + APF]),
     (content: image("figures/lujing/final_snapshot_ga_apf.png", height: 5.2cm, fit: "contain"), subcaption: [GA + APF]),
     (content: image("figures/lujing/final_snapshot_msa_apf.png", height: 5.2cm, fit: "contain"), subcaption: [MSA + APF]),
     (content: image("figures/lujing/final_snapshot_aha_apf.png", height: 5.2cm, fit: "contain"), subcaption: [AHA + APF]),
@@ -1147,11 +1166,11 @@ $ <bspline-sampled-path>
 
 从整体的轨迹上来看，七种算法都能在 APF 局部避障器的辅助下到达目标点，图里面标注的碰撞状态也都是 No，这说明局部避障层可以对全局规划路径进行安全方面的修正，不过，全局路径本身的质量还是会直接影响到 APF 的介入程度以及编队轨迹的形态，如果全局路径在障碍物密集的区域过于贴近障碍物，僚机的轨迹往往就会出现比较明显的横向偏移和队形拉伸；要是全局路径比较平滑，并且留出了足够的通行空间，领航者和僚机的轨迹就更容易保持平行和一致。
 
-PSO、GA、MSA 和 AHA 的终态轨迹整体上比较接近，基本上是沿着主对角线的方向去穿越障碍物的分布区域，并且在中段绕开了多个圆形的障碍物，这里面，PSO 的最终时间为 77.70 s，最小无人机间距为 19.11 m；GA 的最终时间为 81.00 s，最小无人机间距为 19.77 m；MSA 和 AHA 的最终时间都是 77.60 s，最小无人机间距分别为 18.79 m 和 19.83 m，上面这些算法都能够完成任务，不过在中段和靠近终点的地方，僚机的轨迹出现了一定程度的队形展开，这就说明局部的避障修正还是会对编队结构产生影响。
+PSO、GA、MSA 和 AHA 的终态轨迹整体上比较接近，基本上是沿着主对角线的方向去穿越障碍物的分布区域，并且在中段绕开了多个圆形的障碍物，这里面，PSO 的最终时间为 77.70 s，最小无人机间距为 19.11 m；GA 的最终时间为 81.00 s，最小无人机间距为 19.77 m；MSA 和 AHA 的最终时间是 77.00 s和77.50s，最小无人机间距分别为 18.79 m 和 19.83 m，上面这些算法都能够完成任务，不过在中段和靠近终点的地方，僚机的轨迹出现了一定程度的队形展开，这就说明局部的避障修正还是会对编队结构产生影响。
 
-ACOR 的轨迹是最曲折的，最终到达时间是 86.50 s，在七种算法当中是最长的，它的全局路径在中部区域出现了比较明显的弯折，这就使得领航者和僚机在多个障碍物之间产生了额外的绕行，虽然最终并没有发生碰撞，但是任务的效率偏低，最小无人机间距也只有 18.12 m，这和后文五项指标当中 ACOR 路径长度最长、到达时间最长的结果是吻合的。
+ACO 的轨迹是最曲折的，最终到达时间是 86.00 s，在七种算法当中是最长的，它的全局路径在中部区域出现了比较明显的弯折，这就使得领航者和僚机在多个障碍物之间产生了额外的绕行，虽然最终并没有发生碰撞，但是任务的效率偏低，最小无人机间距也只有 18.12 m，这和后文五项指标当中 ACO 路径长度最长、到达时间最长的结果是吻合的。
 
-传统 AL-SHADE 的终态轨迹是最短的，到达也是最快的，最终时间是 70.60 s，不过从图上可以看到，它的全局路径在若干个障碍物之间选择的是比较直接的穿越方式，僚机的轨迹在局部区域需要依靠 APF 来做横向的修正，最终的最小无人机间距为 18.88 m，AL-SHADE-TALG-QU 的最终时间是 73.00 s，比传统的 AL-SHADE 稍微慢了一点，但是最小无人机间距提升到了 20.38 m，这是图示结果里面最高的安全裕度，同时，AL-SHADE-TALG-QU 的全局路径和领航者轨迹都要更加平滑，僚机之间的相对间隔也更加稳定，这就说明 B 样条参数化和威胁感知机制对轨迹的连续性与编队的安全性是有一定改善的。
+传统 AL-SHADE 的终态轨迹是最短的，到达也是最快的，最终时间是 71.30 s，不过从图上可以看到，它的全局路径在若干个障碍物之间选择的是比较直接的穿越方式，僚机的轨迹在局部区域需要依靠 APF 来做横向的修正，最终的最小无人机间距为 18.88 m，AL-SHADE-TALG-QU 的最终时间是 72.60 s，比传统的 AL-SHADE 稍微慢了一点，但是最小无人机间距提升到了 20.38 m，这是图示结果里面最高的安全裕度，同时，AL-SHADE-TALG-QU 的全局路径和领航者轨迹都要更加平滑，僚机之间的相对间隔也更加稳定，这就说明 B 样条参数化和威胁感知机制对轨迹的连续性与编队的安全性是有一定改善的。
 
 总体来看，路径可视化的结果和五项指标的结果基本上是吻合的，传统 AL-SHADE 在任务效率上面更占优势，而 AL-SHADE-TALG-QU 则在路径较短、到达较快的基础上面，提高了最小的机间距和编队轨迹的一致性，它更适合那些对安全裕度要求比较高的无人机集群任务。
 
@@ -1181,7 +1200,7 @@ ACOR 的轨迹是最曲折的，最终到达时间是 86.50 s，在七种算法�
 )[
   | 算法 | 路径 (m) ↓ | 时间 (s) ↓ | 偏转 (°) ↓ | 队形 RMS (m) ↓ | 机间距 (m) ↑ |
   | PSO（粒子群） | 1646.43 | 77.70 | 0.937 | 9.977 | 19.48 |
-  | ACOR（蚁群） | 1805.31 | 86.00 | 1.062 | 9.271 | 18.06 |
+  | ACO（蚁群） | 1805.31 | 86.00 | 1.062 | 9.271 | 18.06 |
   | GA（遗传） | 1684.37 | 80.90 | 0.930 | 9.274 | 19.59 |
   | MSA | 1640.24 | 77.00 | 0.908 | 9.154 | 18.59 |
   | AHA | 1659.34 | 77.50 | 0.952 | 9.395 | 18.74 |
@@ -1189,13 +1208,13 @@ ACOR 的轨迹是最曲折的，最终到达时间是 86.50 s，在七种算法�
   | AL-SHADE-TALG-QU | 1543.71 | 72.60 | 0.796 | 7.989 | 20.47 |
 ]
 
-从任务效率来看，AL-SHADE 和 AL-SHADE-TALG-QU 的平均路径长度要明显短于其他的算法，它们分别是 1540.46 m 和 1543.71 m，两者之间只相差了 3.25 m，这就说明改进后的算法在引入了平滑和安全限制之后，并没有明显地牺牲掉路径的长度，在领航者到达时间这个方面，AL-SHADE 是最短的，为 71.30 s；AL-SHADE-TALG-QU 为 72.60 s，只比 AL-SHADE 多了 1.30 s，还是明显要比 PSO、ACOR、GA、MSA 和 AHA 更优，从中可以看出来，改进算法在保持了比较高的飞行效率的同时，也给路径平滑性和编队安全性留出了更多的优化空间。
+从任务效率来看，AL-SHADE 和 AL-SHADE-TALG-QU 的平均路径长度要明显短于其他的算法，它们分别是 1540.46 m 和 1543.71 m，两者之间只相差了 3.25 m，这就说明改进后的算法在引入了平滑和安全限制之后，并没有明显地牺牲掉路径的长度，在领航者到达时间这个方面，AL-SHADE 是最短的，为 71.30 s；AL-SHADE-TALG-QU 为 72.60 s，只比 AL-SHADE 多了 1.30 s，还是明显要比 PSO、ACO、GA、MSA 和 AHA 更优，从中可以看出来，改进算法在保持了比较高的飞行效率的同时，也给路径平滑性和编队安全性留出了更多的优化空间。
 
-从轨迹平滑性来看，AL-SHADE-TALG-QU 的平均航向偏转是最低的，为 0.796°，优于 AL-SHADE 的 0.835°，也低于 ACOR 的 1.062° 和 AHA 的 0.952°，这表明 B 样条曲线的参数化可以削弱离散航点连接所带来的局部折角，让领航者的轨迹变得更加连续，对于无人机集群来说，更小的航向偏转可以减少飞行控制里面的加速度突变，对僚机在跟随过程中维持队形也是有帮助的。
+从轨迹平滑性来看，AL-SHADE-TALG-QU 的平均航向偏转是最低的，为 0.796°，优于 AL-SHADE 的 0.835°，也低于 ACO 的 1.062° 和 AHA 的 0.952°，这表明 B 样条曲线的参数化可以削弱离散航点连接所带来的局部折角，让领航者的轨迹变得更加连续，对于无人机集群来说，更小的航向偏转可以减少飞行控制里面的加速度突变，对僚机在跟随过程中维持队形也是有帮助的。
 
 从编队保持的效果来看，AL-SHADE-TALG-QU 的相对队形误差 RMS 是 7.989 m，在七种算法里面是最低的结果，和传统 AL-SHADE 的 9.214 m 相比，误差降低了大约 13.30%；和 PSO 的 9.977 m 相比，误差降低了大约 19.93%，这就说明改进算法所生成的路径对编队控制层更加友好，可以减少局部的急转弯和通道压缩对队形结构的扰动，让僚机在跟随领航者的时候保持更加稳定的相对位置。
 
-从安全性来看，AL-SHADE-TALG-QU 的最小无人机间距达到了 20.47 m，在所有算法里面是最大的，这就说明它在飞行过程当中所保留的机间安全裕度是最充分的，相比之下，ACOR 和 MSA 的最小机间距分别是 18.06 m 和 18.59 m，安全裕度相对要弱一些，AL-SHADE 虽然路径比较短、到达时间也最优，但它的最小机间距是 19.12 m，比改进算法要低，综合来看，AL-SHADE-TALG-QU 在路径长度和到达时间上和传统 AL-SHADE 比较接近，同时在平滑性、队形误差还有机间安全距离这三个关键指标上取得了最优的结果，综合的飞行性能更加均衡。
+从安全性来看，AL-SHADE-TALG-QU 的最小无人机间距达到了 20.47 m，在所有算法里面是最大的，这就说明它在飞行过程当中所保留的机间安全裕度是最充分的，相比之下，ACO 和 MSA 的最小机间距分别是 18.06 m 和 18.59 m，安全裕度相对要弱一些，AL-SHADE 虽然路径比较短、到达时间也最优，但它的最小机间距是 19.12 m，比改进算法要低，综合来看，AL-SHADE-TALG-QU 在路径长度和到达时间上和传统 AL-SHADE 比较接近，同时在平滑性、队形误差还有机间安全距离这三个关键指标上取得了最优的结果，综合的飞行性能更加均衡。
 
 == 五指标综合评价
 
@@ -1207,7 +1226,7 @@ ACOR 的轨迹是最曲折的，最终到达时间是 86.50 s，在七种算法�
 )[
   | 算法 | 路径长度排名 | 到达时间排名 | 平滑性排名 | 队形误差排名 | 机间距排名 | 平均排名 |
   | PSO | 4 | 5 | 5 | 7 | 3 | 4.8 |
-  | ACOR | 7 | 7 | 7 | 4 | 7 | 6.4 |
+  | ACO | 7 | 7 | 7 | 4 | 7 | 6.4 |
   | GA | 6 | 6 | 4 | 5 | 2 | 4.6 |
   | MSA | 3 | 3 | 3 | 2 | 6 | 3.4 |
   | AHA | 5 | 4 | 6 | 6 | 5 | 5.2 |
@@ -1215,7 +1234,7 @@ ACOR 的轨迹是最曲折的，最终到达时间是 86.50 s，在七种算法�
   | AL-SHADE-TALG-QU | 2 | 2 | 1 | 1 | 1 | 1.4 |
 ]
 
-从表@exp-rank-table 里面可以知道，AL-SHADE-TALG-QU 的平均排名是 1.4，在七种算法当中是综合最优的，它的路径长度和到达时间都排在第二，和传统 AL-SHADE 的差距比较小；同时在路径平滑性、队形误差还有最小机间距这三项指标上排在第一，优势主要是体现在轨迹质量、编队稳定性还有安全裕度这些方面，传统 AL-SHADE 的平均排名是 2.2，综合表现是次优的，它的特点是任务效率最高，但是队形保持和机间安全不如 AL-SHADE-TALG-QU，MSA 的平均排名是 3.4，整体的表现比较均衡，GA 和 PSO 分别在最小机间距或者收敛速度方面有着一定的优势，但是综合排名是落后于 MSA、AL-SHADE 还有改进算法的，ACOR 在本组指标当中的平均排名是最高的，这说明它在当前的场景下面不太适合作为复杂障碍物环境里面的首选规划算法。
+从表@exp-rank-table 里面可以知道，AL-SHADE-TALG-QU 的平均排名是 1.4，在七种算法当中是综合最优的，它的路径长度和到达时间都排在第二，和传统 AL-SHADE 的差距比较小；同时在路径平滑性、队形误差还有最小机间距这三项指标上排在第一，优势主要是体现在轨迹质量、编队稳定性还有安全裕度这些方面，传统 AL-SHADE 的平均排名是 2.2，综合表现是次优的，它的特点是任务效率最高，但是队形保持和机间安全不如 AL-SHADE-TALG-QU，MSA 的平均排名是 3.4，整体的表现比较均衡，GA 和 PSO 分别在最小机间距或者收敛速度方面有着一定的优势，但是综合排名是落后于 MSA、AL-SHADE 还有改进算法的，ACO 在本组指标当中的平均排名是最高的，这说明它在当前的场景下面不太适合作为复杂障碍物环境里面的首选规划算法。
 
 == 综合分析与讨论
 
@@ -1243,7 +1262,7 @@ ACOR 的轨迹是最曲折的，最终到达时间是 86.50 s，在七种算法�
 
 在编队控制部分，以虚拟领航者作为核心来建立无人机集群的协同模型，并且利用邻接矩阵和拉普拉斯矩阵去描述通信拓扑的关系，在一致性控制律里面，本文加入了通信延迟、速度跟踪还有横向偏置调节的机制，使僚机在跟随领航者运动的时候能够保持住预设的相对位置，当通道发生收缩或者需要把障碍物绕开的时候，队形也能够进行适度的弹性调整，这就为后面的全局路径规划和局部避障提供了一个比较稳定的集群运动基础。
 
-在全局路径规划部分，先建立了一个统一的适应度函数，把路径长度、路径平滑性、静态障碍风险、集群内部碰撞风险、通信风险、通道宽度限制还有编队保持代价都放到了同一个评价框架里面，在这个基础之上，本文对 PSO、ACOR、GA、MSA、AHA 和 AL-SHADE 等算法进行了建模与对比，针对传统 AL-SHADE 在路径连续性、环境风险感知以及外部档案多样性方面所存在的不足，本文提出了 AL-SHADE-TALG-QU 这个改进框架，该框架通过外部档案的相似度去重来减少冗余的历史解，利用由种群威胁度所驱动的 Lévy-Gaussian 双态缩放因子来增强在障碍物密集区域的跳出能力，并且借助 B 样条曲线参数化路径建模来提升轨迹的连续性和平滑性。
+在全局路径规划部分，先建立了一个统一的适应度函数，把路径长度、路径平滑性、静态障碍风险、集群内部碰撞风险、通信风险、通道宽度限制还有编队保持代价都放到了同一个评价框架里面，在这个基础之上，本文对 PSO、ACO、GA、MSA、AHA 和 AL-SHADE 等算法进行了建模与对比，针对传统 AL-SHADE 在路径连续性、环境风险感知以及外部档案多样性方面所存在的不足，本文提出了 AL-SHADE-TALG-QU 这个改进框架，该框架通过外部档案的相似度去重来减少冗余的历史解，利用由种群威胁度所驱动的 Lévy-Gaussian 双态缩放因子来增强在障碍物密集区域的跳出能力，并且借助 B 样条曲线参数化路径建模来提升轨迹的连续性和平滑性。
 
 在局部避障部分，在经典人工势场法的基础之上加入了切向的旋转势场力，无人机在接近障碍物的时候，不单单会受到径向斥力的作用，还会获得一种沿着障碍物边缘去绕行的切向引导，这样的处理方式缓解了传统人工势场法在障碍物前方比较容易出现局部极小值和震荡的问题，它也和全局规划层所输出的参考路径形成了互补：全局路径负责提供远距离的引导，局部避障则负责短时域里面的安全修正。
 
