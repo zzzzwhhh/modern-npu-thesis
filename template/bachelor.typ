@@ -16,13 +16,11 @@
   ],
   keywords: ("无人机集群","路径规划；多障碍物环境；螳螂搜索算法；AL-SHADE；人工势场法"),
   abstract-en: [
-    In urban low-altitude logistics, environmental monitoring, disaster relief, and military reconnaissance scenarios, UAV swarms need to navigate through spaces crowded with obstacles. In such environments, a single feasible path does not guarantee the safety of the entire swarm. If the leader’s trajectory is highly winding, follower UAVs may deviate significantly when tracking it. Likewise, if local obstacle avoidance cannot integrate effectively with formation control, the swarm may become stretched, or the distances between UAVs may shrink too much, creating potential safety risks. Therefore, swarm path planning in two-dimensional, obstacle-rich environments must consider not only path length but also path smoothness, formation stability, and overall safety.
+    For application scenarios such as urban low-altitude logistics, environmental monitoring, disaster rescue, and collaborative reconnaissance, UAV swarms need to simultaneously perform path searching, formation keeping, and online obstacle avoidance in environments with multiple obstacles. A feasible path for a single UAV does not necessarily mean that the swarm's flight is safe: if the global path is too tortuous, it will amplify the following errors of the wingmen, while insufficient coupling between local obstacle avoidance and formation control may cause formation stretching, excessively small inter-UAV distances, or local oscillations. Therefore, path planning for UAV swarms in complex obstacle environments requires a comprehensive trade-off among task efficiency, trajectory smoothness, formation stability, and safety margins.
 
-    To address these challenges, this study establishes a hierarchical, coupled framework comprising formation control, global path planning, and local obstacle avoidance. At the global planning layer, we implement Particle Swarm Optimization (PSO), Ant Colony Optimization (ACO), Genetic Algorithm (GA), Artificial Hummingbird Algorithm (AHA), Mantis Search Algorithm (MSA), and the standard AL-SHADE algorithm for comparative evaluation. Based on this, three improvements are introduced to tackle specific issues when applying AL-SHADE directly for waypoint optimization: redundancy in the external archive, insufficient environment-aware risk perception, and weak path continuity. These enhancements include an external archive similarity deduplication mechanism, a threat-driven Lévy-Gaussian bimodal mutation scaling factor, and B-spline curve-based path parameterization. They respectively improve historical solution utilization, adjust search step sizes, and smooth trajectories, allowing the algorithm to more reliably identify feasible paths in densely obstructed areas.
+To address these issues, this paper establishes a hierarchical coupling framework consisting of a global path planning layer, a formation control layer, and a local obstacle avoidance layer. The global path planning layer is responsible for generating a mission-level reference route from the starting point to the target point, and it uniformly considers factors such as path length, smoothness, obstacle risk, passage width, and formation keeping cost. The formation control layer describes the cooperative relationships among multiple UAVs based on an improved consensus protocol, maintaining the virtual leader-wingman formation under conditions with communication delays and topology changes. The local obstacle avoidance layer is embedded into the flight execution process, performing real-time safety corrections on the global path and formation control commands. These three layers are coupled with one another through reference waypoints, velocity tracking, and acceleration correction, allowing the system to retain the long-distance guidance capability of global planning while also possessing the ability to respond to nearby obstacles. Within the global planning layer, this paper reproduces and compares algorithms such as PSO, ACOR, GA, MSA, AHA, and the traditional AL-SHADE. In view of the problems that occur when AL-SHADE is directly applied to waypoint optimization—such as external archive redundancy, insufficient perception of environmental risk, and weak continuity of discrete waypoints—an improved method, AL-SHADE-TALG-QU, is proposed. This method enhances the diversity of historical solutions through external archive similarity-based deduplication, strengthens the ability to escape from obstacle-dense regions via a threat-driven Lévy-Gaussian dual-state scaling factor, and improves trajectory continuity and executability through B-spline curve parameterized path modeling. In the local obstacle avoidance layer, this paper takes the artificial potential field method as its basis and adds tangential rotational repulsion and a look-ahead predictive deceleration mechanism, so that when a UAV approaches an obstacle, it can not only perform radial avoidance but also form a tendency to detour along the obstacle's edge, thus reducing the impact of local minima and goal non-reachable problems.
 
-    For local obstacle avoidance, a traditional Artificial Potential Field (APF) method is adopted, enhanced with tangential rotational forces so that UAVs can skirt along obstacle edges rather than merely being repelled radially. Local avoidance commands work in conjunction with global path tracking and formation-consistency control, ensuring that UAVs approaching obstacles continue moving toward their mission targets while maintaining the original formation.
-
-    Simulation experiments were conducted in a two-dimensional, multi-obstacle environment, comparing different methods in terms of path length, smoothness, planning success rate, convergence iterations, and formation maintenance error. Results indicate that the improved AL-SHADE offers advantages in path smoothness, formation stability, and inter-UAV safety margins, while also showing superior global optimization and local obstacle avoidance performance.
+The simulation experiments were conducted in a two-dimensional environment with multiple obstacles. In this two-dimensional multi-obstacle environment, this paper compares different methods in terms of indicators such as path length, smoothness, planning success rate, convergence iteration count, and formation keeping error. The experimental results indicate that the improved AL-SHADE demonstrates advantages in path smoothness, formation stability, and safety margins between UAVs, while also performing better in global optimization and local obstacle avoidance capabilities.
   ],
   keywords-en: ("UAV swarm", "path planning", "multi-obstacle environment", "Mantis Search Algorithm", "AL-SHADE", "Artificial Potential Field"),
   appendix: [
@@ -727,6 +725,8 @@ $
 
 控制器是以周期 $Delta t$ 来迭代运行的，在每一个控制步当中，先采集邻居的延迟状态，再根据@eqt:improved-consensus-x 和@eqt:improved-consensus-y 去计算虚拟加速度；在经过了前面所说的两级限制映射之后，控制器输出自驾仪的速度指令，并驱动无人机的状态进行更新，这样一种结构可以在二维平面里面同时兼顾拓扑变化和飞行安全，为全局路径跟踪以及后续的局部避障提供一个稳定的编队控制基础@tao2023。
 
+通过上面的建模和控制律设计，编队控制层已经可以对多架无人机之间的相对位置约束进行描述，并且在通信时延和拓扑变化存在的情况下把基本的队形维持住，但是，编队控制本身主要解决的还是多机协同和队形保持的问题，它并不能完全去处理飞行过程中由近场障碍物、环境变化或者传感器探测误差所带来的即时风险，特别是在障碍物距离比较近或者通道空间比较窄的时候，如果仅仅依靠全局路径和编队一致性控制，无人机还是有可能出现局部碰撞的风险或者队形被过度拉伸，所以，在编队模型的基础之上，还需要进一步把局部避障算法引进来，对每一架无人机的运动指令去做实时的修正，使得全局路径跟踪、队形保持还有近场安全避障能够在同一个闭环里面协同工作。
+
  == 局部避障算法设计与实现
 
 在局部避障算法的设计与实现这一部分，前面给出的全局路径规划器，像 PSO、ACO、GA、MSA、AHA 还有 AL-SHADE，虽然可以为无人机集群提供宏观上的参考航点序列，但在实际飞行当中还是会碰到一些全局规划难以提前覆盖到的局部风险，常见的情形主要有两类：一类是障碍物分布的信息不够精确，比如说传感器探测的范围受到了限制，或者环境本身发生了变化；另一类则是多机编队保持和单机避障之间存在着实时耦合的冲突，因此，本文在全局规划层的下面加进了局部避障层，以人工势场法作为基础，通过对斥力场和前视预测机制进行改进，为每一架无人机实时地生成局部修正加速度，从而补足全局路径在动态环境里的安全裕度。
@@ -825,13 +825,11 @@ bold(u)_i^("cmd") = bold(u)_i^("cons") + bold(u)_("nav") + bold(f)_("rep") $ <in
 最后，本章说明了全局规划、编队控制还有局部避障相互之间的耦合关系，全局路径为领航者提供参考航路，编队控制把这条航路转化为多机的协同运动，局部避障则在近场风险出现的时候对控制指令进行修正，这三者一起构成了完整的任务执行框架，由此可以看出来，全局规划路径的质量会继续影响队形保持和局部避障的效果，所以下一章会进一步围绕全局规划算法去展开改进，以此来提高在复杂障碍物环境下面的路径连续性、安全性以及编队适应性。
 
 
-= 基于成功历史参数自适应学习的差分进化算法改进
-
-== 基于成功历史参数自适应学习的差分进化算法的改进：TALG 框架
+= 编队路径规划算法的改进
 
 把传统基于成功历史参数自适应学习的差分进化算法直接用在路径规划上的时候，它所面临的主要问题集中在档案利用、搜索步长和路径表达这三个方面，首先，外部档案 $cal(A)$ 采用的是随机替换策略，到了迭代后期很容易存入大量重复或者高度相似的解，这就让档案的多样性在不经意间出现了下降，这样一来，current-to-Amean/1 变异策略所依赖的种群分布信息就会变窄，档案均值的引导作用也会跟着被削弱，然后，变异因子 $F$ 采用的是柯西采样，它对所有个体都使用同一类参数生成方式，没有办法根据障碍物的空间分布去调整搜索的尺度，在开阔的区域往往需要用小步长来做精细搜索，而在障碍物比较密集的区域则更需要用较大的步长来帮助个体跳出危险的通道，传统的算法在这两种状态之间缺少一种自适应的切换，除此之外，离散航点编码本身也不对路径的连续性做出限制，各个航点的坐标是独立演化的，即便相邻的两代个体在搜索空间里挨得比较近，解码之后的路径还是可能出现明显的折线和急转弯，进而使得路径平滑性项 $S$ 与长度项 $L$ 在优化的时候互相牵制，基于这些方面的考虑，TALG 框架引入了外部档案相似度去重、由种群威胁度来驱动的 Lévy-Gaussian 双态 $F$ 生成，还有 B 样条曲线参数化路径建模，分别用来改善档案的多样性、环境感知的搜索能力以及路径的几何连续性。
 
-=== 外部档案相似度去重
+== 外部档案相似度去重
 
 传统基于成功历史参数自适应学习的差分进化算法在对外部档案 $cal(A)$ 进行更新的时候，通常采用的是“当档案满了就随机替换掉其中一项”这种方式来存入被淘汰的父代向量，这个方法实现起来是很简单的，但在路径规划任务里面却比较容易带来冗余，随着种群在迭代后期慢慢靠近某一个较优的解，很多被淘汰掉的父代向量都会和这个解非常接近，也就是说在 $bb(R)^(2N)$ 空间当中的距离很小，而随机替换策略没有办法识别出这类相似的个体，于是档案当中就可能积累起大量几乎相同的解，这样计算出来的加权档案均值 $bold(x)_("mean")^t$ 就会变得更像是单一聚类中心的一个近似估计，很难反映出多个独立优质区域的分布信息。
 
@@ -855,8 +853,7 @@ $
 
 在去重效益分析方面，引入了相似度去重之后，外部档案里面保留下来的解会变得更加分散，重复的信息也会减少，在障碍物比较密集的路径规划场景当中，种群往往会集中到少数几条可行的狭窄通道附近，如果不去做去重处理，容量为 $N_A ≈ 1300$（$P = 500$，$r_("arc") = 2.6$）的档案里面，很可能会有相当一部分的槽位都存放着相互距离不到 25 的近重复解，而去重之后，档案就可以覆盖到更广的优质解区域，$bold(x)_("mean")^t$ 的计算也不再过度依赖单一的聚类，这样一来，current-to-Amean/1 变异策略当中的差分方向 $(bold(x)_("mean")^t - bold(x)_i^t)$ 就可以获得区分度更高的搜索引导。
 
-
-
+== 缩放因子的环境感知生成
 
 === 种群威胁度量化模型
 
@@ -901,10 +898,7 @@ sigma_u = lr(frac(Gamma(1 + beta) sin(pi beta / 2), Gamma((1 + beta) / 2) beta 2
 在威胁自适应的整体效果方面，双态 $F$ 生成器把环境风险引入到了参数采样当中，让搜索步长可以随着空间状态而变化，在开阔的空域里面，$T_i ≈ 0$，大多数个体都以高斯态来运行，$F$ 围绕着历史成功均值 $mu_F$ 做小幅的波动，变异的步长比较稳定，算法就更适合去优化路径长度和平滑性，在障碍物密集的通道当中，$T_i -> 1$，更多的个体会进入 Lévy 态并产生较大幅度的差分跳跃，这类跳跃有机会把个体带到障碍物另一侧的安全区域，也可以通过外部档案 $cal(A)$ 把大尺度探索所产生历史信息保留下来，进而影响到后续代的加权档案均值 $bold(x)_("mean")^t$ 和 current-to-Amean/1 的变异方向，由于高斯态与 Lévy 态的比例是由 $T_i$ 连续调节的，搜索行为就不会在安全区和危险区之间突然切换，而是呈现出一种更加平滑的过渡。
 
 
-
-
-
-=== B 样条曲线参数化路径建模
+== B 样条曲线参数化路径建模
 
 B 样条曲线是一类由控制点和节点向量一起确定的分段多项式参数曲线，它和直接把离散航点连接起来所得到的折线路径不一样，而是通过控制点间接地去决定曲线的形态，因此它具有局部支撑、连续性比较好还有端点可以被限制这些特点，在把它用于无人机路径规划的时候，优化的阶段仍然可以只维护有限个控制点；到了适应度评估和轨迹执行的阶段，再由这些控制点去生成连续光滑的飞行路径，这样做就可以缓解离散航点编码所带来的急转弯、折线还有曲率突变的问题。
 
@@ -1004,12 +998,7 @@ $ <bspline-sampled-path>
 
 这样一种参数化的方式可以带来两个直接的好处，其一，B 样条曲线本身就具有连续性，可以比较明显地减少折线路径当中的急转弯和曲率突变，让路径更容易满足无人机的飞行限制，其二，每个控制点只影响到有限的局部曲线段，优化器在调整单个控制点的时候不太容易引起全局路径的剧烈震荡，所以差分变异和交叉操作也就更容易生成可接受的试验向量。
 
-
-
 在降维效应方面，B 样条参数化还能够在保留路径表达能力的同时去降低搜索的难度，在经典的航点编码当中，如果设置 $N = 20$ 个中间航点，那么优化的维度就是 $D = 40$，如果改用少量的控制点去描述曲线的主体形态，需要优化的自由控制点就可以减少到大约 $5 ~ 7$ 个，对应的搜索维度也就降到了 $10 ~ 14$，在比较低的维度下面，差分向量 $(bold(x)_(r_1) - bold(x)_(r_2))$ 当中的有效信息会更加集中，交叉操作也更容易把有意义的路径结构保留下来，所以，B 样条不仅仅改善了路径的平滑性，也降低了 AL-SHADE 在高维航点空间当中的搜索压力。
-
-
-
 
 == 本章小结
 
