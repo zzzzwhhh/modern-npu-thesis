@@ -14,23 +14,29 @@
 
 仿真实验是在二维多障碍物环境当中进行的，本文把不同方法从路径长度、平滑度、规划成功率、收敛迭代次数还有队形保持误差这些指标上做了比较，实验的结果表明，经过改进之后的 AL-SHADE 在路径平滑性、编队稳定性还有无人机之间的安全裕度这些方面是具有优势。
   ],
-  keywords: ("无人机集群","路径规划；多障碍物环境；螳螂搜索算法；AL-SHADE；人工势场法"),
+  keywords: ("无人机集群","路径规划，多障碍物环境，AL-SHADE，人工势场法"),
   abstract-en: [
-    For applications such as urban low-altitude logistics, environmental monitoring, disaster relief, and collaborative reconnaissance, drone swarms must simultaneously perform path searching, formation maintenance, and online obstacle avoidance in environments with multiple obstacles. A feasible path for a single drone does not necessarily guarantee safe flight for the entire swarm: overly convoluted global paths can amplify following errors among follower drones, while insufficient coupling between local obstacle avoidance and formation control may lead to formation stretching, excessive inter-drone distances, or local oscillations. Therefore, path planning for drone swarms in complex obstacle environments requires a comprehensive coordination among mission efficiency, trajectory smoothness, formation stability, and safety margins. 
+    Aiming at the application scenarios of urban low-altitude logistics, environmental monitoring, disaster relief and collaborative reconnaissance, UAV clusters need to complete the tasks of path search, formation maintenance and online obstacle avoidance simultaneously in a multi-obstacle environment. The feasibility of a single path does not necessarily mean that the flight of the cluster is safe : if the global path is too tortuous, the follower error of the wingman will be amplified, and the coupling between local obstacle avoidance and formation control is not sufficient, which may cause formation stretching, too small distance between aircraft or local oscillation. Therefore, path planning for UAV clusters in complex obstacle environments. It is necessary to make comprehensive coordination among task efficiency, trajectory smoothness, formation stability and safety margin.
 
-To address the aforementioned issues, this paper proposes a hierarchical coupled framework consisting of a global path planning layer, a formation control layer, and a local obstacle avoidance layer. The global path planning layer generates task-level reference trajectories from start to goal, integrating considerations such as path length, smoothness, obstacle risk, channel width, and formation maintenance cost. The formation control layer employs an improved consensus protocol to model cooperative relationships among multiple drones, maintaining a virtual leader-follower formation even under communication delays and dynamic topology changes. The local obstacle avoidance layer is embedded within the flight execution process, providing real-time safety corrections to both the global path and formation control commands. These three layers are mutually coupled through reference waypoints, velocity tracking, and acceleration adjustments, enabling the system to retain long-range guidance capabilities from global planning while also responding effectively to nearby obstacles. Within the global planning layer, this study reproduces and compares several algorithms including PSO, ACO, GA, MSA, AHA, and AL-SHADE. To address AL-SHADE's shortcomings—such as redundant external archives, insufficient environmental risk perception, and weak continuity between discrete waypoints—a novel improvement named AL-SHADE-TALG-QU is proposed. This method enhances solution diversity by deduplicating similar entries in the external archive, strengthens exploration capability in obstacle-dense regions using a threat-driven Lévy-Gaussian dual-state scaling factor, and improves trajectory continuity and feasibility via B-spline curve-based path parameterization. In the local obstacle avoidance layer, an artificial potential field approach is adopted, augmented with a tangential rotational repulsion mechanism that enables drones not only to perform radial avoidance when approaching obstacles but also to follow the obstacle edges and navigate around them, thereby mitigating the impact of local minima and unreachable goals. 
+In view of the above problems, this paper establishes a hierarchical coupling framework composed of global path planning layer, formation control layer and local obstacle avoidance layer. The global path planning layer is responsible for generating a task-level reference route from the starting point to the target point, and takes into account the factors such as path length, smoothness, obstacle risk, channel width and formation maintenance cost. The formation control layer is based on the improved consensus protocol to describe the cooperative relationship between multiple UAVs. Under the condition of communication delay and topology change, the virtual leader-follower formation is still maintained. The local obstacle avoidance layer is embedded in the process of flight execution, and the global path and formation control instructions are modified in real time. These three levels are coupled together by reference point, speed tracking and acceleration correction, so that the system not only retains the long-distance guidance ability of global planning, but also has the response ability of near-field obstacles. In the global planning layer, this paper reproduces and compares PSO, ACO, GA, MSA, AHA and AL-SHADE algorithms. Aiming at the problems of external file redundancy, insufficient perception of environmental risks and weak continuity of discrete points in AL-SHADE, an improved method of AL-SHADE-TALG-QU is proposed. This method improves the diversity of historical solutions by removing the similarity of external files. The Lévy-Gaussian double-state scaling factor driven by threats is used to enhance the ability to jump out of obstacle-intensive areas, and then the continuity and enforceability of the trajectory are improved by B-spline curve parametric path modeling.In the local obstacle avoidance layer, based on the artificial potential field method, this paper adds the tangential rotation repulsion mechanism, so that the UAV can not only do radial avoidance when it is close to the obstacle, but also form a trend of detour along the edge of the obstacle, so as to reduce the influence of local minimum and target unreachable problem.
 
-The simulation experiments were conducted in a two-dimensional environment with multiple obstacles. This paper compares different methods based on metrics such as path length, smoothness, planning success rate, number of convergence iterations, and formation maintenance error. The experimental results show that the improved AL-SHADE outperforms others in terms of path smoothness, formation stability, and safety margin among drones.
+The simulation experiment is carried out in a two-dimensional multi-obstacle environment. In this paper, different methods are compared in terms of path length, smoothness, planning success rate, number of convergence iterations, and formation maintenance error. The experimental results show that the improved AL-SHADE has advantages in path smoothness, formation stability, and safety margin between drones.
   ],
-  keywords-en: ("UAV swarm", "path planning", "multi-obstacle environment", "Mantis Search Algorithm", "AL-SHADE", "Artificial Potential Field"),
+  keywords-en: ("UAV swarm", "path planning", "multi-obstacle environment",  "AL-SHADE", "Artificial Potential Field"),
   appendix: [
-     
+     无
   ],
   acknowledgement: [
     行文至此，我的大学时光即将画上句点，心中满是感慨与感激。首先，我要把最诚挚的谢意献给我的导师陈进朝老师。从选题时的迷茫，到框架的反复推敲，再到定稿前字斟句酌的修改，每一步都离不开您的悉心指点。您严谨的治学态度和耐心的教导，让我真正懂得了“认真”二字的分量。感谢我的室友和朋友们，是你们让深夜的宿舍充满欢笑，让焦虑的毕业季变得温暖而难忘。更要感谢我的父母，你们永远是我最坚实的后盾，用无条件的爱与支持，让我能心无旁骛地完成学业。最后，也想谢谢那个曾经为一道题、一页文献而绞尽脑汁的自己。毕业不是终点，而是新的起点，愿我能带着这份感激与勇气，坚定地走向下一段旅程。
   ],
   design_summary: [
-    小结内容……
+    这次毕业设计让我把一个课题从开始到结束完整地做了一遍，从最初查阅文献、弄明白研究的背景，到后面搭建实验环境、动手去实现算法，再到最后分析数据和撰写论文，每一个环节都让自己学到了新的东西，最开始面对一个复杂的问题时，头脑里的思路常常是模糊的，需要依靠大量阅读前人的工作，才能慢慢理出一条清晰的技术路线，这个过程锻炼了自己从一堆资料里提取关键内容的本领，也让我明白，做研究不能凭空去想象，而是必须站在已有成果的基础上再往前走。
+
+在具体动手实现的时候，书本上看不到的困难碰到了很多，比如代码运行出来的结果和理论推导完全对不上了，仿真环境里的参数不管怎么去调，都很难达到预想中的效果，为了解决这一类问题，我反复地去检查逻辑、调整方案，还向老师和同学请教了很多次，恰恰是这个不停“遇到问题、解决问题”的循环，让之前学到的知识变得立体了，有些理论在课堂上听着很枯燥，可当它们被用来解释一个现象或者优化一个性能的时候，带来的感受是完全不一样的，动手做事情的能力和独立思考的能力，也跟着这个过程提高了不少。
+
+这次设计也带来一个很深的体会，做技术和做工程需要保持一种平衡的心态，很多时候，人们都想追求一个尽善尽美的结果，但实际调试的过程，往往就是一个不断妥协和折中的过程，比如想得到更精确的结果，可能就需要牺牲一些计算速度，想让系统更加稳定，可能就要接受模型变得稍微复杂一点，学会在不同指标之间做取舍，并根据实际场景去权衡哪一个目标更加重要，这或许是这次毕业设计带来的、比技术本身更让人受益的收获。
+
+回顾整个过程，虽然最终做出了一个能够运行的原型系统，也拿到了一些初步的结论，但自己知识储备上的不足，同样看得比较清楚，尤其是在面对一些更深层次的理论推导时，还是会感到有一点吃力，论文的写作和表达方面，也需要在今后的学习里继续去打磨，这个课题就像是一个起点，它把研究方向的趣味和广阔前景展现在了眼前，未来如果有机会，自己很想在这个基础上再继续深入下去，把现在的遗憾和不足慢慢填补起来。
   ],
 )
 
@@ -85,43 +91,45 @@ The simulation experiments were conducted in a two-dimensional environment with 
 
 = 相关工作
 
-无人机集群的路径规划会涉及到编队控制、全局路径搜索和局部避障等多个环节，在这些环节当中，参考航迹的整体质量由全局规划算法来决定，并且它也会直接影响到后续编队跟踪和局部修正的稳定性，所以本章把重点放在全局路径规划算法上面，先给出统一的路径评价函数，再对 PSO、ACO、GA、MSA、AHA 和 AL-SHADE 等算法在本文任务里的建模方式与实现逻辑进行说明。
+在无人机集群的路径规划里面，编队控制、全局路径搜索还有局部避障这些环节都会涉及，在这些环节当中，参考航迹的整体质量是由全局规划算法来决定的，它也会直接对后面编队跟踪和局部修正的稳定性产生影响。本章按照算法机理的不同，把相关的方法分成了群智能算法、进化算法和强化学习算法这三类来分别介绍，群智能算法里面主要包括了 PSO 和 MSA，进化算法部分则主要介绍 GA 和 AL-SHADE，强化学习算法选取 DQN 和 DDPG 作为代表来进行说明。
 
-== 全局路径规划算法设计与实现
+== 群智能算法
 
-在全局路径规划层中，它的任务是为领航者生成一条从起点到目标点的参考路径，同时这条路径需要能够被编队控制和局部避障模块稳定地使用，因为不同优化算法所得到的候选路径在长度、平滑性、安全裕度还有编队可行性这些方面会有比较大的差异，所以本文采用了一个统一的适应度函数来作为评价的标准，各个算法都在相同的路径编码、搜索边界以及限制条件下进行优化，这样就能保证后续的实验比较具有一致性。
+群智能算法通常是通过多个个体之间的信息共享与协同行为来完成搜索的，在路径规划问题里面，这类方法可以把每一个个体都看作是一条候选航迹，借助群体的迭代去不断地改善路径的质量，本文在这类方法当中主要介绍粒子群算法和螳螂搜索算法，其中 PSO 的结构比较简单、收敛速度也比较快，适合被当作全局路径搜索的基础对比方法；MSA 则借助多阶段搜索机制来增强种群的探索与开发能力。
 
-=== 适应度函数设计
+=== 粒子群算法（PSO）设计与实现
 
-假设候选解经过解码之后，得到的二维参考路径为
+在把 PSO 用到无人机的路径规划之前，需要先明确候选路径的评价方式，在全局路径规划层里面，它的任务是为领航者生成一条从起点到目标点的参考路径，同时这条路径还要能被编队控制和局部避障模块稳定地使用下去，由于不同的优化算法所得到的候选路径在长度、平滑性、安全裕度还有编队可行性这些方面会出现比较大的差异，所以本文在 PSO 这一小节里先给出统一的适应度函数，后续各类算法都采用同样的路径编码、搜索边界和适应度评价方式去进行优化。
+
+先假设候选解经过解码之后，得到的二维参考路径是
 
 $
 cal(Q) = {bold(q)_1, bold(q)_2, dots, bold(q)_M}, quad bold(q)_k in bb(R)^2
 $
 
-这里 $M$ 为路径采样点数量。领航者沿 $cal(Q)$ 飞行，而其余无人机会按照预设的队形偏移和局部避障修正来确定自己的位置 $bold(p)_(i,k)$。所以，这样一来，适应度函数就不仅仅是在评价领航者本身的路径，同时也在评价这条路径对集群安全和队形保持所带来的影响。
+在这里 $M$ 是路径采样点的数量，领航者沿着 $cal(Q)$ 去飞行，而其余的无人机则会按照预设的队形偏移和局部避障修正来确定各自的位置 $bold(p)_(i,k)$，所以这样一来，适应度函数不单单是评价领航者本身的路径，同时也会评价这条路径给集群安全和队形保持所带来的影响。
 
-本文将路径规划写成加权多目标优化问题：
+本文把路径规划写成一个加权多目标优化的问题：
 
 $
 J(bold(X)) = alpha L + beta S + gamma R + mu W + lambda F
 $
 
-在上面的式子里，$L$ 为路径长度代价，$S$ 为路径平滑代价，$R$ 为综合风险代价，$W$ 为通道宽度限制惩罚，$F$ 为编队保持代价；$alpha$、$beta$、$gamma$、$mu$ 和 $lambda$ 分别是它们所对应的权重。在实际计算的时候，每一个分量都会被先做归一化处理，然后再代入到加权和当中，算法采用的是“适应度越大越优”这种形式，把它转换成
+在上面的式子里面，$L$ 对应的是路径长度代价，$S$ 对应的是路径平滑代价，$R$ 对应的是综合风险代价，$W$ 对应的是通道宽度限制惩罚，$F$ 则对应的是编队保持代价；$alpha$、$beta$、$gamma$、$mu$ 和 $lambda$ 分别是和它们所对应的权重，在实际去计算的时候，每一个分量都会被先拿去做归一化处理，然后再代入到加权和里面，算法采用的是“适应度越大越优”这种形式，把它转换成
 
 $
 "Fitness"(bold(X)) = frac(1, J(bold(X)) + epsilon)
 $
 
-进行等价转换，其中 $epsilon$ 为极小正数。本文主要以最小化 $J$ 为优化目标。
+来作等价的表示，其中的 $epsilon$ 是一个极小的正数，本文主要把最小化 $J$ 当作优化的目标。
 
-路径长度代价用于限制飞行距离：
+路径长度代价被用来对飞行距离进行限制：
 
 $
 L = sum_(k=1)^(M-1) norm(bold(q)_(k+1) - bold(q)_k)
 $
 
-路径平滑代价由相邻路径段夹角决定：
+路径平滑代价通过相邻路径段之间的夹角来确定：
 
 $
 theta_k = arccos frac((bold(q)_k - bold(q)_(k-1)) dot (bold(q)_(k+1) - bold(q)_k), norm(bold(q)_k - bold(q)_(k-1)) norm(bold(q)_(k+1) - bold(q)_k))
@@ -131,72 +139,70 @@ $
 S = sum_(k=2)^(M-1) theta_k^2
 $
 
-当路径频繁急转时，$theta_k$ 增大，平滑代价随之上升。该项可以减少折线航迹，使规划结果更适合无人机连续飞行。
+当路径频繁出现急转弯的时候，$theta_k$ 就会变大，平滑代价也就跟着上升，加入这一项可以减少折线形状的航迹，让规划出来的结果更适合无人机连续地飞行。
 
-综合风险代价由静态障碍风险、集群内部碰撞风险和通信风险组成：
+综合风险代价是由静态障碍风险、集群内部的碰撞风险还有通信风险这几部分加在一起构成的：
 
 $
 R = R_s + R_c + R_f
 $
 
-静态障碍风险用于描述路径点与障碍物之间的距离关系：
+静态障碍风险用来描述路径点和障碍物之间的距离关系：
 
 $
-R_s = sum_(k=1)^M exp lr(- frac((d_s(bold(q)_k) - r_("eq"))^2, sigma_s^2))
+R_s = sum_(k=1)^M exp ^(- frac((d_s(bold(q)_k) - r_("eq"))^2, sigma_s^2))
 $
 
-其中 $d_s(bold(q)_k)$ 表示路径点到最近静态障碍物表面的距离，$r_("eq")$ 为安全半径，$sigma_s$ 控制风险衰减速度。无人机越靠近障碍物，风险项越大。
+其中 $d_s(bold(q)_k)$ 表示的是路径点到最近静态障碍物表面的距离，$r_("eq")$ 是安全半径，$sigma_s$ 控制着风险衰减的速度，无人机越是靠近障碍物，风险项就会越大。
 
-集群内部碰撞风险用于限制无人机之间的最小距离：
+集群内部的碰撞风险被用来限制无人机相互之间的最小距离：
 
 $
 R_c = sum_(k=1)^M sum_(i<j) phi(d_(i j)(t_k)), quad
 phi(d) = cases((1 - d / d_("safe"))^2 quad d < d_("safe"), 0quad d >= d_("safe"))
 $
 
-其中 $d_("safe")$ 为最小安全距离。通信风险用于避免编队链路过长：
+这里的 $d_("safe")$ 是最小的安全距离，通信风险则是为了避免编队链路被拉得太长：
 
 $
 R_f = sum_(k=1)^M sum_((i,j) in cal(E)) max(0, d_(i j)(t_k) - d_("comm"))^2
 $
 
-$cal(E)$ 表示通信链路集合，$d_("comm")$ 为通信半径。
+$cal(E)$ 代表的是通信链路的集合，$d_("comm")$ 是通信半径。
 
-通道宽度惩罚用于判断当前路径是否满足编队通行需求：
+通道宽度惩罚用来判断当前的路径能不能满足编队通行的需要：
 
 $
 W = sum_(k=1)^M max(0, B_("req", k) - B_k)^2
 $
 
-其中 $B_k$ 为路径点附近的可通行宽度，$B_("req", k)$ 为编队通过该位置所需的最小宽度。当允许队形适度压缩时，可令
+这里的 $B_k$ 是路径点附近可以通行的宽度，$B_("req", k)$ 则是编队在通过这个位置时所需要的最小宽度，当允许队形进行适度的压缩时，可以让
 
 $
 B_("req", k) = B_("form")^"min" + eta_b Delta B_k
 $
 
-编队保持代价用于衡量实际队形与期望队形之间的偏差。若采用领航者-僚机偏移模型，可写为
+编队保持代价是用来衡量实际队形和期望队形之间的偏差的，如果采用的是领航者-僚机偏移模型，它就可以被写成
 
 $
 F = sum_(k=1)^M sum_(i=1)^n norm(delta_(i,k) - delta_i^*)^2
 $
 
-其中 $delta_i^*$ 为第 $i$ 架无人机的理想相对偏移，$delta_(i,k)$ 为实际偏移。也可以用邻接边距离误差表示：
+这里面 $delta_i^*$ 是第 $i$ 架无人机的理想相对偏移，$delta_(i,k)$ 则是实际的偏移，当然也可以用邻接边距离误差来把它表示成：
 
 $
 F = sum_(k=1)^M sum_((i,j) in cal(E)) (norm(bold(p)_(i,k) - bold(p)_(j,k)) - d_(i j)^*)^2
 $
 
-适应度函数把路径效率、安全避障、轨迹平滑和编队保持统一到同一评价框架中，为后续各类优化算法提供共同目标。
+通过这样一个适应度函数，路径效率、安全避障、轨迹平滑还有编队保持就被统一地放到了同一个评价框架当中，这就为后面各类优化算法提供了一个共同的目标。
 
-=== 粒子群算法（PSO）设计与实现
-
-粒子群算法通过模拟群体协同行为完成搜索。每个粒子表示一条候选路径，其位置向量由 $N$ 个中间航点组成：
+在上面这个适应度函数的基础之上，粒子群算法通过去模拟群体的协同行为来完成搜索，每一个粒子都代表一条候选路径，它的位置向量是由 $N$ 个中间航点所组成的：
 
 $
 bold(X)_i = [x_(i,1), y_(i,1), dots, x_(i,N), y_(i,N)] in bb(R)^(2N)
 $
 
-种群初始化时，先根据起点和终点生成基线航点，再在基线两侧设置带状搜索边界。粒子位置在边界内随机生成，速度向量可初始化为零或小扰动。第 $i$ 个粒子在第 $t$ 代的速度和位置更新为
+在种群进行初始化的时候，先根据起点和终点去生成基线航点，再在基线的两侧设置出带状的搜索边界，粒子的位置就在这个边界里面随机地产生出来，速度向量可以被初始化为零或者是一个很小的扰动，第 $i$ 个粒子在第 $t$ 代的速度和位置按照下面的方式来更新：
 
 $
 bold(V)_i^(t+1) = omega bold(V)_i^t + c_1 r_1 (bold(P)_i^"best" - bold(X)_i^t) + c_2 r_2 (bold(G)^"best" - bold(X)_i^t)
@@ -206,125 +212,37 @@ $
 bold(X)_i^(t+1) = bold(X)_i^t + bold(V)_i^(t+1)
 $
 
-其中 $omega$ 为惯性权重，$c_1$ 和 $c_2$ 分别为个体学习因子和群体学习因子，$r_1$、$r_2$ 为 $[0,1]$ 内随机数，$bold(P)_i^"best"$ 为个体历史最优位置，$bold(G)^"best"$ 为全局最优位置。更新完成之后如果粒子超出了边界，就把它裁剪到允许的范围里面。
+在式子当中，$omega$ 是惯性权重，$c_1$ 和 $c_2$ 分别是个体学习因子和群体学习因子，$r_1$、$r_2$ 是处在 $[0,1]$ 范围内的随机数，$bold(P)_i^"best"$ 是个体的历史最优位置，$bold(G)^"best"$ 是全局的最优位置，在更新完成之后如果粒子超出了边界，就把它裁剪到允许的范围里面。
 
-PSO 的执行过程可以被描述为下面这样：首先，依据起点、终点还有带状搜索边界把粒子的位置初始化好，同时给每一个粒子都设置好初始的速度；接下来，把粒子的位置解码成航点序列，算出对应路径的适应度，并且把个体最优位置和全局最优位置记录下来；然后，在每一轮迭代当中，按照惯性项、个体学习项和群体学习项去更新粒子的速度，再通过速度去更新粒子的位置；在这之后，对越界的粒子进行边界修正，重新计算适应度，如果新位置比粒子自身的历史最优还要好，就对个体最优进行更新，要是它还优于当前的全局最优，就同时把全局最优也一起更新；等到迭代全部结束以后，算法会把全局最优粒子所对应的航点序列当作规划出来的路径进行输出。
-
-=== 蚁群算法（ACO）设计与实现
-
-基本蚁群算法通常被用在离散图的搜索里面，它的核心是依靠信息素的强度还有启发式因子，来决定一只蚂蚁从当前的节点转移到下一个节点的概率，对于蚂蚁 $k$ 来说，它从节点 $i$ 转移到被允许访问的节点 $j$ 的概率，一般会被写成下面这个样子：
-
-$
-p_(i j)^k = frac(tau_(i j)^alpha eta_(i j)^beta, sum_(l in "allowed"_k) tau_(i l)^alpha eta_(i l)^beta)
-$
-
-在这个式子里，$tau_(i j)$ 是边 $(i,j)$ 上面的信息素强度，$eta_(i j)$ 是启发式因子，$alpha$ 和 $beta$ 分别用来表示信息素和启发式因子各自的重要程度，在一次迭代结束以后，信息素通常会按照挥发和增量这两种方式来进行更新：
-
-$
-tau_(i j)(t+1) = (1-rho) tau_(i j)(t) + Delta tau_(i j)(t), quad
-Delta tau_(i j)(t) = sum_(k=1)^m Delta tau_(i j)^k
-$
-
-这里面，$rho$ 是信息素的挥发率，$Delta tau_(i j)^k$ 所表示的是第 $k$ 只蚂蚁在边 $(i,j)$ 上所释放出来的信息素量，它常见的一种定义是
-
-$
-Delta tau_(i j)^k = cases(
-  Q / L_k quad "if ant " k " used edge " (i,j),
-  0 quad "otherwise"
-)
-$
-
-/* 本文在无人机路径规划里采用的是连续航点编码，候选解是直接处在实数的坐标空间当中的，并不存在固定的离散边 $(i,j)$，所以这里并不直接去使用基本 ACO 的状态转移概率，而是采用了连续域的蚁群优化算法 ACO，ACO 把信息素模型转化成了建立在解档案上面的高斯核采样，通过档案里优质解的排序权重来引导新解的产生，设档案的容量为 $K$，档案当中第 $l$ 个解是 $bold(s)_l$，它的适应度为 $J_l$，档案按照适应度从小到大排好序以后，较优的解就能获得更高的采样概率：
-
-$
-omega_l = frac(1, q K sqrt(2 pi)) exp(lr(- frac((l - 1)^2, 2 q^2 K^2))), quad
-p_l = frac(omega_l, sum_(h=1)^K omega_h)
-$
-
-在这里 $q$ 是用来控制选择压力的，每一只蚂蚁先按照概率 $p_l$ 去选择一个引导解，然后再围绕这个解去做高斯采样：
-
-$
-X_j^"new" = s_(l,j) + cal(N)(0, sigma_j^2)
-$
-
-标准差 $sigma_j$ 是根据档案里面同一个维度上的离散程度来确定的，它通常被写成
-
-$
-sigma_j = xi frac(1, K-1) sum_(h=1, h != l)^K |s_(h,j) - s_(l,j)|
-$
-
-式子里面的 $xi$ 是搜索尺度的参数，新的解生成之后还需要去裁剪边界、把它解码成路径并且计算出适应度，然后再和原来的档案合并在一起重新排序，只把排在前面的 $K$ 个解保留下来。 */
-
-ACO 的执行过程可以被概括为下面这样：首先，在带状的搜索空间里面去生成一批初始的候选路径，并且按照适应度把这些路径排好顺序，由此建立起一个解档案；随后，依据档案里面各个解的排序位置，去算出高斯核权重和选择概率，这样一来质量比较好的路径就能够获得更高的采样概率；然后，每一只蚂蚁都会按照概率从档案里面去挑选出一个引导解，再根据档案的分布情况去计算出各个维度的采样标准差；在这之后，把引导解当作中心来进行高斯采样，由此生成新的航点编码，同时也对那些越界的部分做出修正处理；再然后，计算出新路径的适应度，把它和原来的档案合并到一起重新进行排序，只把排在前面的 $K$ 个较优解保留下来；像这样的过程会被反复地执行，一直等到迭代次数达到了最大值才停下来，最后把档案里面适应度最小的那一条路径输出，作为全局规划的结果。
-
-=== 遗传算法（GA）设计与实现
-
-遗传算法（Genetic Algorithm, GA）是一种模拟自然选择和遗传进化过程的随机搜索算法，主要通过选择、交叉还有变异这些操作来持续地更新种群，在本文中，针对无人机二维路径规划里的连续航点优化问题，采用的是实数编码的遗传算法，直接在航点的坐标空间当中进行搜索，这样就可以避免因二进制编码而带来的精度损失和维度膨胀问题。
-
-*染色体编码与初始化。* 每条染色体对应 $N$ 个中间航点的二维坐标，可表示为
-
-$
-bold(C) = [x_1, y_1, x_2, y_2, dots, x_N, y_N] in bb(R)^(2N)
-$
-
-初始种群的生成方式和 PSO 里所用的基线扰动方式是一样的，形成规模为 $P$ 的初始种群 $cal(P)_0$。所有个体均通过统一适应度函数 $J$ 进行评价，适应度较小的染色体表示路径质量较优。
-
-*选择算子。* 本文采用 $k$-锦标赛选择，在每一次进行选择的时候，会从当前的种群里面随机抽出 $k$ 个体，然后从里面挑出适应度最小的那一个来作为父代，和轮盘赌选择相比较，锦标赛选择并不依赖于适应度的绝对数值，只是按照相对优劣来确定父代，因此在路径代价差异比较大的时候会表现得更加稳定。本文取 $k = 3$。
-
-*交叉算子。* 对两个父代染色体 $bold(C)_(p_1)$ 和 $bold(C)_(p_2)$，采用整体算术交叉生成子代：
-
-$
-bold(C)_("child") = alpha bold(C)_(p_1) + (1 - alpha) bold(C)_(p_2), quad alpha tilde.op cal(U)(0, 1)
-$
-
-该算子相当于在两个父代张成的高维线段上进行插值，可以继承父代中的有效航点组合，并在二者之间生成新的候选路径。
-
-*变异算子。* 为防止种群过早收敛，对子代中的航点坐标施加高斯变异。对第 $w$ 个航点，以概率 $p_m$ 执行：
-
-$
-bold(C)_("child")[w] arrow bold(C)_("child")[w] + cal(N)(0, sigma(g)^2 bold(I)_2), quad w = 1, 2, dots, N
-$
-
-其中 $bold(I)_2$ 为二维单位矩阵。变异强度随代数线性衰减：
-
-$
-sigma(g) = sigma_0 * (1 - frac(g, G_("max")))
-$
-
-$g$ 为当前代数，$G_("max")$ 为最大代数，$sigma_0$ 为初始变异强度。进化前期使用较大的变异步长，有利于扩大搜索范围；后期逐渐减小步长，使种群更多围绕较优路径进行局部修正。
-
-*精英保留与终止。* 为避免交叉和变异破坏已获得的优质路径，每代先按适应度对种群排序，并将前 $P_("elite") = max(5, round(0.1 P))$ 个最优个体直接保留到下一代。其余个体通过锦标赛选择、算术交叉和高斯变异生成，直到新种群规模恢复为 $P$。当算法达到最大代数 $G_("max")$ 后，输出当前种群中适应度最小的染色体作为全局路径航点序列。
-
-GA 的执行过程如下，首先根据起点、终点和带状搜索边界生成初始染色体种群，并计算每条候选路径的适应度；随后，按适应度排序并保留一部分精英个体，避免当前较优路径在后续操作中被破坏；然后，通过锦标赛选择从种群中选出父代；接着，采用算术交叉生成子代，并按给定概率对航点坐标施加高斯变异；之后，对越界航点进行修正，并重新计算子代适应度。新一代种群由精英个体和新生成子代共同组成，循环执行上述过程，直到达到最大代数，最后输出适应度最小的染色体作为全局规划路径。
-
+PSO 的执行过程可以被描述成下面这样：首先，依据起点、终点还有带状的搜索边界去把粒子的位置初始化好，同时给每一个粒子都设置好初始的速度；接下来，把粒子的位置解码成航点序列，算出对应路径的适应度，并且把个体最优位置和全局最优位置记录下来；然后，在每一轮的迭代当中，按照惯性项、个体学习项和群体学习项去更新粒子的速度，再通过速度去更新粒子的位置；在这之后，对越界的粒子进行边界修正，再重新计算适应度，如果新位置比粒子自身的历史最优还要好，就对个体最优进行更新，要是它还优于当前的全局最优，就同时把全局最优也一起更新；等到迭代全部结束以后，算法就把全局最优粒子所对应的航点序列当作规划出来的路径输出去。
 
 === 螳螂搜索算法（MSA）设计与实现
 
-螳螂搜索算法（Mantis Search Algorithm, MSA）由 Abdel-Basset 等提出，其基本思想来源于螳螂寻找猎物、攻击猎物以及性食同类等行为。与一般只依靠单一扰动方式的群体智能算法不同，MSA 将搜索过程划分为寻找猎物、攻击猎物和性食同类三个阶段：寻找猎物阶段负责扩大搜索范围，攻击猎物阶段围绕当前最优解进行开发，性食同类阶段则通过个体重组和强扰动维持种群多样性。
+螳螂搜索算法是由 Abdel-Basset 等提出来的，它的基本想法来源于螳螂寻找猎物、攻击猎物还有性食同类这些行为，和一般只依靠单一扰动方式的群体智能算法不一样，MSA 把搜索过程划分成了寻找猎物、攻击猎物和性食同类三个阶段：寻找猎物阶段负责去扩大搜索的范围，攻击猎物阶段是围绕当前的最优解来进行开发，性食同类阶段则通过个体的重组和强扰动来维持种群的多样性。
 
-在无人机路径规划中，每只螳螂对应一条候选航点序列。第 $i$ 个个体在第 $t$ 次迭代时的位置向量为
+在无人机的路径规划当中，每一只螳螂都对应着一条候选的航点序列，第 $i$ 个个体在第 $t$ 次迭代时候的位置向量是
 
 $
 bold(x)_i^t = [x_(i,1)^t, y_(i,1)^t, dots, x_(i,N)^t, y_(i,N)^t]
 $
 
-初始化阶段根据搜索空间上下界生成初始种群：
+在初始化阶段，根据搜索空间的上下界去生成初始的种群：
 
 $
 bold(x)_i^0 = bold(x)_L + bold(r) dot (bold(x)_U - bold(x)_L)
 $
 
-其中 $bold(x)_L$ 和 $bold(x)_U$ 分别为下界和上界，$bold(r)$ 为 $[0,1]$ 内的随机向量。初始化后计算所有个体的适应度，并记录当前全局最优解 $bold(x)^*$。同时建立外部存档，用于保存迭代过程中出现的优质历史解，为后续伏击行为和跳出局部区域提供参考。
+这里的 $bold(x)_L$ 和 $bold(x)_U$ 分别是下界和上界，$bold(r)$ 则是 $[0,1]$ 内的随机向量，初始化之后采用 PSO 小节里面相同的适应度函数 $J$ 去评价所有的个体，并且把当前的全局最优解 $bold(x)^*$ 记录下来，同时建立一个外部存档，用来保存迭代过程当中所出现的那些优质历史解，给后面的伏击行为和跳出局部区域提供参考。
 
-*寻找猎物阶段。* 该阶段主要承担全局探索任务。MSA 通过回收控制因子 $F$ 调节追捕者行为和伏击者行为的切换：
+*寻找猎物阶段。* 这个阶段主要承担的是全局探索的任务，MSA 通过回收控制因子 $F$ 来调节追捕者行为和伏击者行为之间的切换：
 
 $
 F = 1 - (t "mod" (T / P)) / (T / P)
 $
 
-式中，$P$ 为回收因子。$F$ 在每个周期内由 1 逐渐衰减到 0，使算法可以周期性地从大范围搜索过渡到较集中的局部搜索，避免搜索模式过早固定。
+在式子里，$P$ 是回收因子，$F$ 在每个周期里面由 1 渐渐地衰减到 0，让算法可以周期性地从大范围的搜索过渡到比较集中的局部搜索，这样就避免了搜索模式过早地固定下来。
 
-追捕者行为用于模拟螳螂主动移动寻找猎物。其位置更新可写为：
+追捕者行为被用来模拟螳螂主动地移动去寻找猎物，它的位置更新可以被写成：
 
 $
 bold(x)_i^(t+1) = cases(
@@ -333,9 +251,9 @@ bold(x)_i^(t+1) = cases(
 )
 $
 
-其中 $bold(x)_a^t$、$bold(x)_b^t$ 和 $bold(x)_c^t$ 为随机个体，$bold(tau)_1$ 为 Lévy 飞行扰动向量，$tau_2$ 为正态随机数，$bold(U)$ 为二值掩码向量。该式既包含大尺度随机游走，也包含由随机个体差分关系产生的方向重组，有利于在复杂障碍环境中寻找新的可行通道。
+这里面 $bold(x)_a^t$、$bold(x)_b^t$ 和 $bold(x)_c^t$ 是随机选出来的个体，$bold(tau)_1$ 是 Lévy 飞行的扰动向量，$tau_2$ 是正态随机数，$bold(U)$ 则是二值掩码向量，这个式子里面既包含了大尺度的随机游走，也包含了由随机个体差分关系所产生的方向重组，对在复杂障碍环境里面寻找新的可行通道是有利的。
 
-伏击者行为则利用外部存档中的历史优质解作为参考。设 $bold(x)_("ar")^t$ 为存档中随机选取的个体，则有：
+伏击者行为则是利用外部存档里面那些历史优质解来作为参考，设 $bold(x)_("ar")^t$ 是从存档里随机选出来的个体，那么就有：
 
 $
 bold(x)_i^(t+1) = cases(
@@ -350,252 +268,277 @@ $
 alpha = cos(pi r_6) dot mu, quad mu = 1 - t / T
 $
 
-$mu$ 随迭代逐渐减小，使伏击者在前期具有较大的搜索半径，在后期更多围绕历史优质区域精细调整。
+$mu$ 随着迭代的进行在慢慢地减小，这就让伏击者在前期拥有比较大的搜索半径，到了后期则更多地围绕着历史的优质区域去做精细的调整。
 
-*攻击猎物阶段。* 当算法进入开发阶段时，当前全局最优解 $bold(x)^*$ 被视为猎物位置。MSA 先通过 Sigmoid 函数计算击打速度：
+*攻击猎物阶段。* 当算法进入到开发阶段的时候，当前全局的最优解 $bold(x)^*$ 就会被看作是猎物的位置，MSA 先通过 Sigmoid 函数去算出击打的速度：
 
 $
 v_s = 1 / (1 + e^(l dot rho))
 $
 
-再根据个体与猎物之间的距离确定攻击方向：
+再根据个体和猎物之间的距离去确定攻击的方向：
 
 $
 bold(d)_(s i)^t = bold(x)^* - bold(x)_i^t
 $
 
-若击打成功，个体向当前最优解靠近：
+如果击打成功，个体就朝着当前的最优解靠近：
 
 $
 bold(x)_i^(t+1) = (bold(x)_i^t + bold(x)^*) / 2 + v_s dot bold(d)_(s i)^t
 $
 
-若击打失败，则根据随机个体之间的差分关系修正方向：
+要是击打失败，就根据随机个体相互之间的差分关系去修正方向：
 
 $
 bold(x)_i^(t+1) = bold(x)_i^t + r_(12) dot (bold(x)_a^t - bold(x)_b^t)
 $
 
-击打失败概率定义为
+击打失败的概率被定义成
 
 $
 P_f = a dot (1 - t / T)
 $
 
-该概率随迭代增加而降低，表示算法前期允许更多方向试探，后期逐渐转向稳定收敛。若个体出现陷入局部区域的趋势，还可引入振荡扰动：
+这个概率会随着迭代的增加而降低，它表示算法在前期允许更多方向上的试探，到了后期就逐渐转向稳定的收敛，如果个体出现了陷入局部区域的趋势，还可以引入振荡的扰动：
 
 $
 bold(x)_i^(t+1) = bold(x)_i^t + e^(2l) dot cos(2 pi l) dot |bold(x)_i^t - bold(x)_("ar")^t| + (2 r_(13) - 1) dot (bold(x)_U - bold(x)_L)
 $
 
-这一项通过非线性振荡和搜索空间尺度扰动增强跳出局部最优的能力。
+这一项通过非线性的振荡和搜索空间尺度的扰动来增强跳出局部最优的能力。
 
-*性食同类阶段。* 该阶段用于模拟雌性螳螂吸引、交配并吞食雄性的过程，本质上是一组维持多样性的重组算子。首先，个体根据随机同伴进行吸引更新：
+*性食同类阶段。* 这个阶段用来模拟雌性螳螂吸引、交配并且吞食雄性的过程，本质上是一组维持多样性的重组算子，首先，个体根据随机选出的同伴去做吸引更新：
 
 $
 bold(x)_i^(t+1) = bold(x)_i^t + bold(r)_(16) dot (bold(x)_i^t - bold(x)_a^t)
 $
 
-随后通过二值掩码执行交配重组：
+随后通过二值掩码来执行交配重组：
 
 $
 bold(x)_i^(t+1) = bold(x)_i^t dot bold(U) + (bold(x)_a^t + bold(r)_(18) dot (bold(x)_i^t - bold(x)_a^t)) dot (1 - bold(U))
 $
 
-吞食行为可表示为：
+吞食行为可以被表示成：
 
 $
 bold(x)_i^(t+1) = bold(x)_a^t dot cos(2 pi l) dot mu
 $
 
-该阶段在种群过快收敛时可以重新引入差异信息，降低搜索陷入单一路径通道的概率。
+这个阶段在种群收敛得过快的时候可以重新把差异信息引入进来，降低搜索陷入到单一路径通道里的概率。
 
-/* 在本文实现中，每次位置更新后都需要进行边界修复，再重新计算适应度。若新个体优于旧个体，则接受更新；否则保留原个体。若新个体优于当前全局最优解，则更新 $bold(x)^*$ 并写入外部存档。迭代达到最大次数后，输出全局最优个体对应的航点序列。整体上，MSA 通过追捕、伏击、击打和性食同类等多种搜索机制，在全局探索、局部开发和种群多样性之间保持平衡。 */
+MSA 的执行过程可以被概括成下面几步：首先，根据航点的搜索边界去把螳螂种群随机地初始化好，并采用与 PSO 小节相同的适应度函数 $J$ 去计算每一个个体所对应路径的代价；随后，建立起外部存档，把当前搜索过程当中所出现的那些优质历史解保存下来；然后，在每一轮的迭代里面根据回收控制因子去选择追捕者或者伏击者行为，以此来完成寻找猎物阶段的全局探索；接着，围绕当前的最优解去执行攻击猎物阶段，并且根据击打成功、击打失败或者振荡扰动去更新个体；随后，按照概率去执行性食同类的操作，通过吸引、交配和吞食的行为去增加种群的扰动，每一次更新之后都要进行边界修复、适应度评价还有最优解的记录，一直等到达到了最大迭代次数之后，才输出全局最优的航点序列。
 
-MSA 的执行过程可概括为以下几步。首先，根据航点搜索边界随机初始化螳螂种群，并计算每个个体对应路径的适应度；随后，建立外部存档，保存当前搜索过程中出现的优质历史解；然后，在每轮迭代中根据回收控制因子选择追捕者或伏击者行为，完成寻找猎物阶段的全局探索；接着，围绕当前最优解执行攻击猎物阶段，并根据击打成功、击打失败或振荡扰动更新个体；随后，按概率执行性食同类操作，通过吸引、交配和吞食行为增加种群扰动。每次更新后都进行边界修复、适应度评价和最优解记录，直到达到最大迭代次数后输出全局最优航点序列。
+== 进化算法
 
-=== 人工蜂鸟算法（AHA）设计与实现
+进化算法是通过选择、变异、交叉还有历史经验积累这些机制去不断地更新候选解的，这类方法适合去处理连续航点坐标的优化问题，本文在这一类方法当中介绍遗传算法和 AL-SHADE，其中 GA 作为经典的进化算法，主要体现的是选择、交叉和变异的基本想法；AL-SHADE 则进一步把历史成功参数记忆和种群规模缩减的机制引了进来，具有更强的自适应搜索能力。
 
-人工蜂鸟算法（Artificial Hummingbird Algorithm, AHA）模拟蜂鸟的空间记忆、灵活飞行和觅食行为。算法中每只蜂鸟对应一个候选解，食物源位置对应无人机全局路径的航点编码。设路径包含 $N$ 个中间航点，则第 $i$ 只蜂鸟的位置向量为：
+=== 遗传算法（GA）设计与实现
 
-$
-bold(x)_i = [x_(i,1), y_(i,1), dots, x_(i,N), y_(i,N)] in bb(R)^(2N)
-$
+遗传算法是一种在模拟自然选择和遗传进化过程的基础上建立起来的随机搜索算法，它主要是通过选择、交叉还有变异这些操作去持续地更新种群，在本文当中，针对无人机二维路径规划里面的连续航点优化问题，所采用的是实数编码的遗传算法，直接在航点的坐标空间当中去进行搜索，这样就能避免由于二进制编码所带来的精度损失和维度膨胀问题。
 
-种群初始化时，所有蜂鸟在带状搜索边界内随机生成：
+*染色体编码与初始化。* 每一条染色体都对应着 $N$ 个中间航点的二维坐标，它可以被表示为
 
 $
-bold(x)_i^0 = bold(x)_L + bold(r) dot (bold(x)_U - bold(x)_L)
+bold(C) = [x_1, y_1, x_2, y_2, dots, x_N, y_N] in bb(R)^(2N)
 $
 
-其中 $bold(x)_L$ 和 $bold(x)_U$ 分别为搜索空间下界和上界。每个个体解码为航点序列后，与起点、终点共同构成完整路径，并使用前述适应度函数计算代价 $J(bold(x)_i)$。
+初始种群的生成方式和 PSO 里面所用的基线扰动方式是一样的，这样就形成了规模为 $P$ 的初始种群 $cal(P)_0$，所有的个体都通过 PSO 小节当中相同的适应度函数 $J$ 去进行评价，适应度比较小的染色体表示对应路径的质量比较优。
 
-*访问表与目标食物源选择。* AHA 的核心结构是访问表 $bold(V T)$。访问表用于记录蜂鸟对不同食物源的访问间隔，初始状态为：
+*选择算子。* 本文所采用的是 $k$-锦标赛选择，在每一次去做选择的时候，会从当前的种群里面随机地抽出 $k$ 个个体，然后从里面把适应度最小的那一个挑出来作为父代，和轮盘赌选择来比，锦标赛选择并不依赖于适应度的绝对数值，只按照相对的优劣去确定父代，所以在路径代价差异比较大的时候表现得会更加稳定，本文把 $k$ 取为 3。
 
-$
-(V T)_(i,j)^0 = cases("null" quad i = j, 0  quad i != j)
-$
-
-其中主对角线表示蜂鸟自身所在食物源，不参与访问选择。对蜂鸟 $i$ 而言，算法先在第 $i$ 行中寻找访问间隔最大的食物源；若多个食物源访问间隔相同，则选择其中适应度更优的个体作为目标。该规则可写为：
+*交叉算子。* 对于两个父代的染色体 $bold(C)_(p_1)$ 和 $bold(C)_(p_2)$，采用整体算术交叉的办法来生成子代：
 
 $
-cal(C)_i = {j | (V T)_(i,j) = max_(k != i) (V T)_(i,k)}, quad
-j^* = arg min_(j in cal(C)_i) J(bold(x)_j)
+bold(C)_("child") = alpha bold(C)_(p_1) + (1 - alpha) bold(C)_(p_2), quad alpha tilde.op cal(U)(0, 1)
 $
 
-这样既能避免频繁重复访问同一食物源，也能使搜索逐步向高质量路径附近集中。
+这个算子就相当于是两个父代所张成的高维线段上面进行插值，它可以把父代当中那些有效的航点组合继承下来，并且在它们之间产生出新的候选路径。
 
-*飞行模式。* ，AHA 是通过一个方向向量 $bold(D) in {0,1}^(2N)$ 来控制这一次更新要涉及到哪些维度，如果只挑选一个维度来更新，那就对应着轴向飞行，比较适合对单个航点的坐标去做精细的调整；如果是随机选了好几个维度一起更新，那就对应着对角飞行，可以同时对若干个航点进行调整；要是所有的维度都参与了更新，那就对应着全向飞行，能够对整条路径的形态产生比较大的扰动，这三种飞行模式合在一起，就提供了从局部微调一直到全局扰动的不同搜索尺度。
-
-*引导觅食。* 引导觅食模拟蜂鸟根据记忆飞向目标食物源的行为。设目标食物源为 $bold(x)_(j^*)^t$，候选位置更新为：
+*变异算子。* 为了防止种群过早地收敛，对子代里面的航点坐标施加高斯的变异，对于第 $w$ 个航点，以概率 $p_m$ 去执行：
 
 $
-bold(v)_i^(t+1) = bold(x)_(j^*)^t + a dot bold(D) dot (bold(x)_i^t - bold(x)_(j^*)^t), quad a tilde.op cal(N)(0,1)
+bold(C)_("child")[w] arrow bold(C)_("child")[w] + cal(N)(0, sigma(g)^2 bold(I)_2), quad w = 1, 2, dots, N
 $
 
-其中 $a$ 为标准正态随机变量，$dot$ 表示逐元素乘法。当 $a$ 较小时，候选解靠近目标食物源；当 $a$ 取较大值或负值时，候选解可能跨越目标区域，从而增强跳出局部最优的能力。
-
-*领地觅食。* 领地觅食模拟蜂鸟在自身食物源附近继续搜索的行为。其更新不依赖外部目标，而是在当前个体附近施加扰动：
+这里的 $bold(I)_2$ 是二维的单位矩阵，变异的强度会随着代数去做线性的衰减：
 
 $
-bold(v)_i^(t+1) = bold(x)_i^t + b dot bold(D) dot bold(x)_i^t, quad b tilde.op cal(N)(0,1)
+sigma(g) = sigma_0 * (1 - frac(g, G_("max")))
 $
 
-其中 $b$ 同样服从标准正态分布。该策略主要用于局部开发，可对当前路径的部分航点进行修正。
+$g$ 是当前的代数，$G_("max")$ 是最大的代数，$sigma_0$ 是初始的变异强度，在进化的前期使用比较大的变异步长，这对扩大搜索范围是有利的；到了后期再逐渐地把步长减小，让种群更多地围绕着较优的路径去做局部的修正。
 
-*迁徙觅食。* 为避免种群长期集中在局部区域，AHA 每隔 $2n$ 次迭代触发一次迁徙操作。算法选取当前适应度最差的蜂鸟：
+*精英保留与终止。* 为了让交叉和变异不至于把已经获得的优质路径破坏掉，每一代都先按照适应度把种群排好顺序，并且把排在前面的 $P_("elite") = max(5, round(0.1 P))$ 个最优个体直接保留到下一代去，剩下的那些个体就通过锦标赛选择、算术交叉和高斯变异来生成，一直到新种群的规模恢复为 $P$ 为止，当算法达到最大代数 $G_("max")$ 以后，就把当前种群里面适应度最小的那条染色体输出，作为全局路径的航点序列。
 
-$
-i_("worst") = arg max_i J(bold(x)_i^t)
-$
+GA 的执行过程是下面这样的：首先，根据起点、终点还有带状的搜索边界去生成初始的染色体种群，并采用与 PSO 小节相同的适应度函数 $J$ 去计算每一条候选路径的代价；随后，按照适应度排序并保留下来一部分的精英个体，避免当前比较优的路径在后续的操作里面被破坏掉；然后，通过锦标赛选择从种群里面把父代选出来；接着，采用算术交叉来生成子代，并且按照给定的概率去对航点坐标施加高斯的变异；之后，对越界的航点进行修正，再重新计算子代的适应度，新一代的种群是由精英个体和新生成的子代一起组成的，循环地去执行上面的过程，一直到达到了最大的代数，最后把适应度最小的那条染色体输出，作为全局规划的路径。
 
-并将其重新随机初始化：
-
-$
-bold(x)_(i_("worst"))^(t+1) = bold(x)_L + bold(r) dot (bold(x)_U - bold(x)_L)
-$
-
-迁徙觅食相当于向种群注入新的候选路径，可在搜索后期补充多样性。
-
-*边界处理、贪婪选择与访问表更新。* 引导觅食或领地觅食生成候选解后，先对越界维度进行裁剪，再计算候选路径的适应度。个体更新采用贪婪准则：
-
-$
-bold(x)_i^(t+1) = cases(
-  bold(v)_i^(t+1) quad J(bold(v)_i^(t+1)) < J(bold(x)_i^t),
-  bold(x)_i^t quad "otherwise"
-)
-$
-
-每次觅食后都需要更新访问表。若蜂鸟 $i$ 在引导觅食中访问了目标食物源 $j^*$，则将 $(V T)_(i,j^*)$ 置为 0，同一行中其他可访问元素加 1：
-
-$
-(V T)_(i,j^*) arrow 0, quad (V T)_(i,k) arrow (V T)_(i,k) + 1, quad k != j^*
-$
-
-若蜂鸟位置得到改善，则其他蜂鸟对该新食物源的访问间隔也需要相应刷新，使新产生的优质解更容易在后续迭代中被关注。
-
-AHA 的路径规划流程可以概括为：先把蜂鸟种群和访问表初始化好；在每一轮迭代当中随机地去选择飞行模式，并且在引导觅食和领地觅食之间进行切换；产生候选解之后接着进行边界处理、适应度评价还有贪婪选择；按照规则去更新访问表，并且周期性地去执行迁徙觅食，这种算法借助访问表减少了重复搜索，依靠多种飞行模式来调节更新的尺度，再通过迁徙机制让全局探索的能力被维持住。
 
 === 基于成功历史参数自适应学习的差分进化算法（AL-SHADE）设计与实现
 
-基于成功历史参数自适应学习的差分进化算法是在 L-SHADE 基础上发展而来的自适应差分进化算法，后文简称 AL-SHADE。该算法保留成功历史参数记忆和线性种群规模缩减机制，并引入 current-to-Amean/1 变异策略，以利用外部档案中的优质历史信息。本文将 AL-SHADE 作为主要全局路径规划框架。
+基于成功历史参数自适应学习的差分进化算法是在 L-SHADE 的基础上发展起来的一种自适应差分进化算法，后文把它简称为 AL-SHADE，这种算法保留了成功历史参数记忆和线性种群规模缩减的机制，并且把 current-to-Amean/1 的变异策略引了进来，以便利用外部档案里面的优质历史信息，本文把 AL-SHADE 作为主要的全局路径规划框架来使用。
 
-AL-SHADE 的个体编码仍为二维航点向量：
+AL-SHADE 的个体编码采用的仍然是二维航点向量：
 
 $
 bold(x)_i = [x_(i,1), y_(i,1), dots, x_(i,N), y_(i,N)]
 $
 
-初始种群按搜索边界随机生成：
+初始的种群按照搜索边界随机地去生成：
 
 $
 bold(x)_i^0 = bold(x)_L + bold(r) dot (bold(x)_U - bold(x)_L)
 $
 
-算法维护两个历史记忆数组 $bold(M)_F$ 和 $bold(M)_("C R")$，分别存储成功的缩放因子和交叉概率。每个个体在迭代时随机选择一个记忆槽，并由柯西分布和高斯分布生成参数：
+算法维护着两个历史记忆数组 $bold(M)_F$ 和 $bold(M)_("C R")$，分别用来存储成功的缩放因子和交叉概率，每一个个体在迭代的时候都会随机地去选择一个记忆槽，并且由柯西分布和高斯分布来生成参数：
 
 $
 F_i tilde.op "Cauchy"(M_(F,r_i), 0.1), quad (C R)_i tilde.op cal(N)(M_(C R,r_i), 0.1)
 $
 
-AL-SHADE 采用两类变异策略。第一类为 current-to-pbest/1：
+AL-SHADE 采用了两类变异策略，第一类是 current-to-pbest/1：
 
 $
 bold(v)_i = bold(x)_i + F_i (bold(x)_("pbest") - bold(x)_i) + F_i (bold(x)_(r_1) - bold(x)_(r_2))
 $
 
-其中 $bold(x)_("pbest")$ 从前 $p$% 优质个体中随机选取，$bold(x)_(r_2)$ 可来自当前种群或外部档案。
+在这里面 $bold(x)_("pbest")$ 是从前 $p$% 的优质个体当中随机去选取的，$bold(x)_(r_2)$ 则可以是来自当前的种群或者外部的档案。
 
 
-第二类变异策略为 current-to-Amean/1：
+第二类变异策略是 current-to-Amean/1：
 
 $
 bold(v)_i = bold(x)_i + F_i (bold(x)_("Amean") - bold(x)_i) + F_i (bold(x)_(r_1) - bold(x)_(r_2))
 $
 
-其中 $bold(x)_("Amean")$ 为外部档案中优质个体的加权均值：
+在这里面 $bold(x)_("Amean")$ 是外部档案里面优质个体的加权均值：
 
 $
 bold(x)_("Amean") = sum_(i=1)^m w_i bold(a)_i
 $
 
-权重可按排序位置确定：
+权重可以按照排序的位置去确定：
 
 $
 w_i = frac(ln(m + 0.5) - ln(i), sum_(j=1)^m (ln(m + 0.5) - ln(j)))
 $
 
-*自适应策略选择。* AL-SHADE 对两种变异策略采用概率调度。对每个个体生成随机数 $r in [0, 1]$，若 $r < P_s$，则执行 current-to-pbest/1；否则执行 current-to-Amean/1。第 $g$ 代结束后，根据两种策略产生改进解的成功比例更新 $P_s$：
+*自适应策略选择。* AL-SHADE 对这两类变异策略采用的是概率调度的方式，对于每一个个体，生成一个随机数 $r in [0, 1]$，要是 $r < P_s$，就执行 current-to-pbest/1；否则就去执行 current-to-Amean/1，在第 $g$ 代结束之后，根据这两种策略产生改进解的成功比例去更新 $P_s$：
 
 $
 P_s^(g+1) = P_s^g + 0.05 dot (1 - P_s^g) dot (P_1 - P_2) dot frac(F_("Es"), F_("max"))
 $
 
-其中，$P_1$ 和 $P_2$ 分别表示 current-to-pbest/1 与 current-to-Amean/1 在当前代中的成功比例，$F_("Es")$ 为已消耗的函数评价次数，$F_("max")$ 为最大函数评价次数。若 $P_1 > P_2$，说明精英引导策略在当前阶段更有效，$P_s$ 相应增大；反之，则增加 current-to-Amean/1 的执行机会。该机制使算法可以随搜索进程动态调节开发和探索强度。
+在这里，$P_1$ 和 $P_2$ 分别表示 current-to-pbest/1 与 current-to-Amean/1 在当前代当中的成功比例，$F_("Es")$ 是已经消耗掉的函数评价次数，$F_("max")$ 是最大的函数评价次数，要是 $P_1 > P_2$，那就说明精英引导策略在当前这个阶段更加有效，$P_s$ 也就相应地增大；反过来，就增加 current-to-Amean/1 的执行机会，这样的机制使得算法能够随着搜索的进程去动态地调节开发和探索的强度。
 
 
-变异后，算法使用二项交叉生成试验向量：
+在变异之后，算法使用二项交叉去生成试验的向量：
 
 $
 u_(i,j) = cases(v_(i,j) quad r_j <= (C R)_i " or " j = j_("rand"), x_(i,j) quad "otherwise")
 $
 
-其中 $j_("rand")$ 保证至少一个维度来自变异向量。若变异向量越界，则采用父代与边界之间的中点进行修正：
+这里的 $j_("rand")$ 保证至少会有一个维度是来自变异向量的，要是变异向量越了界，那就采用父代和边界之间的中点去做修正：
 
 $
 v_(i,j) = cases((x_(i,j) + L_j) / 2 quad v_(i,j) < L_j, (x_(i,j) + U_j) / 2 quad v_(i,j) > U_j, v_(i,j) quad "otherwise")
 $
 
-选择阶段采用贪婪准则：
+在选择阶段采用的是贪婪准则：
 
 $
 bold(x)_i^(g+1) = cases(bold(u)_i^g quad J(bold(u)_i^g) <= J(bold(x)_i^g), bold(x)_i^g quad "otherwise")
 $
 
-若试验个体优于父代，则父代进入外部档案，同时记录本次成功的 $F_i$、$(C R)_i$ 及适应度改变量。历史记忆通过加权 Lehmer 平均更新：
+如果试验个体要优于父代，那么父代就进入到外部档案里面，同时把这次成功的 $F_i$、$(C R)_i$ 还有适应度的改变量记录下来，历史的记忆通过加权 Lehmer 平均去更新：
 
 $
 "mean"_("WL")(S) = frac(sum_n w_n s_n^2, sum_n w_n s_n), quad
 w_n = frac(|J(bold(x)_n) - J(bold(u)_n)|, sum_l |J(bold(x)_l) - J(bold(u)_l)|)
 $
 
-为提高后期开发能力，AL-SHADE 还采用线性种群规模缩减策略。设初始种群规模为 $P_("init")$，最小种群规模为 $P_("min")$，则当前目标种群规模为：
+为了把后期的开发能力提高，AL-SHADE 还采用了线性种群规模缩减的策略，设初始的种群规模为 $P_("init")$，最小的种群规模为 $P_("min")$，那么当前目标的种群规模就是：
 
 $
-P_(g+1) = "round" lr(frac(F_("Es"), F_("max")) dot (P_("min") - P_("init")) + P_("init"))
+P_(g+1) = "round" (frac(F_("Es"), F_("max")) dot (P_("min") - P_("init")) + P_("init"))
 $
 
-随着函数评估次数增加，种群规模逐步从 $P_("init")$ 降至 $P_("min")$，计算资源也从广域探索转向局部精细搜索。
+随着函数评估次数的不断增加，种群的规模也就逐步地从 $P_("init")$ 降到了 $P_("min")$，计算资源也随之从广域的探索转向了局部的精细搜索。
 
-在无人机路径规划中，AL-SHADE 的实现流程可以概括为：初始化种群、历史记忆和外部档案；为每个个体生成 $F_i$ 与 $(C R)_i$；按自适应概率选择变异策略；交叉得到试验个体；根据适应度执行选择并更新外部档案；最后更新历史记忆和种群规模。与 PSO、ACO、GA、MSA 和 AHA 相比，AL-SHADE 更适合连续航点坐标优化，可以在保持搜索多样性的同时逐步提高局部开发能力。但传统 AL-SHADE 仍未显式考虑路径连续性、障碍威胁感知和外部档案相似解冗余问题，这也是后文进行改进的主要原因。
+在无人机的路径规划当中，AL-SHADE 的实现流程可以被概括成这样：先把种群、历史记忆还有外部档案都初始化好；再为每一个个体生成 $F_i$ 和 $(C R)_i$；接着按照自适应的概率去选择变异策略；通过交叉得到试验个体；根据 PSO 小节里面相同的适应度函数 $J$ 去执行选择并且更新外部档案；最后把历史记忆和种群规模更新好，和 PSO、GA、MSA 来比较的话，AL-SHADE 更适合去做连续航点坐标的优化，可以在保持搜索多样性的同时，一步一步地提高局部的开发能力，但传统的 AL-SHADE 仍然没有明确地去考虑路径连续性、障碍威胁感知还有外部档案相似解冗余的问题，这也是后文要去做改进的主要原因。
+
+== 强化学习算法
+
+强化学习算法是把路径规划或者运动控制的过程看成是智能体和环境之间的交互问题，智能体根据当前的状态去选择动作，环境再返回新的状态和奖励信号，算法就通过不断地试错来学到更优的决策策略，和前面的群智能算法、进化算法来比较，强化学习更加强调在线的决策和策略的泛化能力，所以常常被用在动态障碍物的避让、局部路径的修正还有连续控制指令的生成这些任务当中。
+
+=== 深度 Q 网络（DQN）算法
+
+深度 Q 网络是在 Q-learning 的基础上发展起来的一种深度强化学习方法，它利用神经网络去近似状态 $s$ 下面动作 $a$ 的价值函数 $Q_s(a)$，在路径规划问题里面，状态 $s$ 可以由无人机当前的位置、目标的方向、障碍物的距离还有局部的地图信息来组成，动作 $a$ 则可以被离散化成向前、左转、右转、减速这些有限的动作，DQN 的基本更新目标可以被写成：
+
+$
+y = r + gamma max_(a') Q_(theta^-)(z')
+$
+
+在这里，$r$ 是当前的奖励，$gamma$ 是折扣因子，$z'$ 表示由下一状态 $s'$ 和候选动作 $a'$ 所组成的下一状态-动作对，$theta^-$ 是目标网络的参数，在训练网络的时候通常是最小化当前 Q 值和目标 Q 值之间的误差：
+
+$
+L(theta) = (y - Q_theta(z))^2
+$
+
+这里面，$z$ 表示的是由状态和动作所组成的状态-动作对，为了让训练更加稳定，DQN 通常会把经验回放和目标网络引进来，经验回放把智能体和环境交互所得到的样本 $s$、$a$、$r$、$s'$ 存到缓存池里面，再随机地去抽取小批量的样本来做训练，这样就能减少样本相互之间的相关性；目标网络则是延迟地去更新参数，用来缓解 Q 值估计的震荡。
+
+DQN 的基本执行流程可以被概括成下面这样：首先把 Q 网络的参数 $theta$、目标网络的参数 $theta^-$ 还有经验回放池都初始化好；然后，智能体根据当前的状态 $s$，采用 $epsilon$-greedy 策略去选出动作 $a$；执行了动作以后，环境返回奖励 $r$ 和下一状态 $s'$，并把样本 $s$、$a$、$r$、$s'$ 存到经验回放池里面；接着，从经验回放池当中随机地抽取一批样本，根据目标网络去算出目标值 $y$，再通过最小化损失函数 $L(theta)$ 来更新 Q 网络；每隔一定的步数，就把当前 Q 网络的参数同步到目标网络里面去，把上面的过程重复进行，一直到训练结束，之后就可以利用训练好的 Q 网络在给定的状态下面去选择对应的路径规划动作。
+
+=== 深度确定性策略梯度（DDPG）算法
+
+深度确定性策略梯度是一种面向连续动作空间的 Actor-Critic 强化学习算法，它的结构主要是由 Actor 网络和 Critic 网络组成的，Actor 网络表示的是当前的策略，它的作用是根据状态 $s$ 去生成一个确定性的连续动作；Critic 网络则被用来评价 Actor 所给出的动作质量，也就是去估计当前状态和动作组合所能带来的长期回报，为了避免在训练过程当中目标值出现剧烈的变化，DDPG 还会分别给 Actor 和 Critic 设置对应的目标网络，目标网络的参数并不是每一步都完全复制，而是通过软更新的方式缓慢地去跟随主网络变化，与此同时，DDPG 也会使用经验回放池，把交互过程当中所得到的样本保存下来，再随机地抽样训练，从而去减弱样本之间的时间相关性，让训练过程的稳定性得到提高。
+
+Actor 网络的输出可以被表示成
+
+$
+a = mu_(theta^mu)(s)
+$
+
+其中，$mu_(theta^mu)$ 表示的是带有参数 $theta^mu$ 的 Actor 策略网络，$s$ 是当前的状态，$a$ 是网络所输出的连续动作，Critic 网络则是被用来评价状态-动作对的长期价值的，可以写成
+
+$
+Q = Q_(theta^Q)(z)
+$
+
+其中，$theta^Q$ 是 Critic 网络的参数，$z$ 表示的是由状态 $s$ 和动作 $a$ 所组成的状态-动作对，$Q$ 是这个动作在当前状态下所对应的累计回报估计。
+
+在训练 Critic 网络的时候，需要先利用奖励和目标网络去构造目标值，它的形式可以被写成：
+
+$
+y = r + gamma Q_("tar")(z')
+$
+
+这里面，$z'$ 表示的是由下一状态和目标 Actor 网络输出动作所组成的状态-动作对，$Q_("tar")$ 是目标 Critic 网络，Critic 网络通过最小化误差去进行更新：
+
+$
+L = frac(1, N) sum_i (y_i - Q_(theta^Q)(z_i))^2
+$
+
+Actor 网络则是沿着 Critic 所给出的价值梯度去更新策略：
+
+$
+nabla_(theta^mu) J approx frac(1, N) sum_i nabla_a Q_(theta^Q)(z_i^mu) nabla_(theta^mu) mu_(theta^mu)(s_i)
+$
+
+通过经验回放和目标网络的软更新，DDPG 可以在一定程度上减弱样本的相关性还有目标值的震荡，和 DQN 相比，DDPG 不需要把控制动作离散化，所以它可以直接去输出连续的避障修正或者飞行控制量，这对无人机连续的路径跟踪和局部的机动控制来说要更加适合，不过，DDPG 对奖励函数的设计、探索噪声还有训练的稳定性是比较敏感的，在复杂的障碍物环境里面通常需要和安全约束或者传统规划方法结合在一起使用。
+
+DDPG 的基本执行流程可以被概括成这样：首先把 Actor 网络、Critic 网络还有它们所对应的目标网络都初始化好，并且建立起经验回放池；然后，Actor 网络根据当前的状态 $s$ 去输出连续的动作 $a$，同时在训练阶段加入一定的探索噪声；执行了动作以后，环境返回奖励 $r$ 和下一状态 $s'$，并把交互的样本存到经验回放池里面；接着，从经验回放池当中随机地去采样一批数据，利用目标 Actor 和目标 Critic 去算出目标值 $y$，再去更新 Critic 网络；随后，根据 Critic 网络所给出的策略梯度去更新 Actor 网络；最后，通过软更新的方式缓慢地去更新目标网络的参数，把上面的过程重复进行，一直到训练结束，之后就可以利用训练好的 Actor 网络根据当前的状态直接输出连续的控制动作。
 
 
 
 == 本章小结
 
-本章围绕无人机集群全局路径规划算法来展开，首先建立了一个统一的适应度函数，在这个评价框架里面，路径长度、平滑性、静态障碍风险、机间安全、通信限制、通道宽度还有编队保持等因素都被纳入其中，该函数为不同的优化算法提供了共同的比较标准，同时也让后续的实验可以从任务效率、安全性以及队形稳定性这些方面去进行综合分析。
+本章对无人机集群路径规划里面常用到的算法进行了分类的介绍，首先，在群智能算法这一部分，本文介绍了 PSO 和 MSA，其中在 PSO 小节给出了统一的适应度函数，把路径长度、平滑性、静态障碍风险、机间安全、通信限制、通道宽度还有编队保持这些因素都纳进了同一个评价框架里面，后续的算法都沿用了这一评价标准；MSA 则是通过寻找猎物、攻击猎物和性食同类这些阶段，在全局探索和局部开发之间去做切换。
 
-在算法层面，本章分别介绍了 PSO、ACO、GA、MSA、AHA 和 AL-SHADE 在二维航点优化问题当中的设计方式，PSO 的收敛速度比较快，ACO 和 GA 比较适合用在经典启发式的对比上，MSA 与 AHA 则借助生物启发机制来增强搜索的多样性，而 AL-SHADE 依靠历史参数记忆和线性种群缩减机制，更适合对连续航点坐标去做自适应的优化，通过上面这些内容，可以明确各个算法在全局路径规划里的基本作用、适用特点以及潜在不足，下一章将会在这个基础之上进一步建立无人机编队控制模型和局部避障模型，为全局路径的执行与检验提供支撑。
+其次，在进化算法这一部分，本文介绍了 GA 和 AL-SHADE，GA 通过选择、交叉和变异去更新候选的航点序列，适合被当作经典进化算法的代表；AL-SHADE 则是依靠成功历史参数记忆、自适应策略选择和线性种群规模缩减的机制，更适合去处理连续航点坐标的优化问题。
+
+最后，在强化学习算法这一部分，本文介绍了 DQN 和 DDPG，前者比较适合离散动作空间下面的局部决策，后者则更适合连续动作空间当中的控制量生成，下一章将会在这个基础之上建立起编队控制模型和局部避障模型，为全局路径的执行与检验提供支撑。
 
 = 编队模型构建
 
@@ -633,7 +576,7 @@ $ cases(
 
 === 无人机动力学模型
 
-在无人机的编队建模当中，常常会采用包含自驾仪的三自由度运动学模型，在基础的運動学方程里面，纵向运动和横向运动之间是存在耦合关系的，对横向航向自驾仪和纵向自驾仪做解耦处理之后，就可以建立起一个横纵分离的运动学模型，其中，无人机 i 的运动模型如公式(3)所示。
+在无人机的编队建模当中，常常会采用包含自驾仪的三自由度运动学模型，在基础的运动学方程里面，纵向运动和横向运动之间是存在耦合关系的，对横向航向自驾仪和纵向自驾仪做解耦处理之后，就可以建立起一个横纵分离的运动学模型，其中，无人机 i 的运动模型如公式(3)所示。
 $ cases(
   dot(x)_i = v_i cos theta_i,
   dot(y)_i = v_i sin theta_i,
@@ -741,7 +684,7 @@ theta_(min,i) = theta_i(t) + omega_min Delta t, quad
 theta_(max,i) = theta_i(t) + omega_max Delta t
 $
 
-假如预测出来的航向偏离了这个区间，那就在保持合加速度幅值不变的前提下面，把航向修正到最近的边界值 $theta_("bound")$ 上，再联立求解出加速度的最终可行解 $(u''_(x i), u''_(y i))$，经过这两级修正之后的控制量通过式@eqt:control-to-autopilot 映射为满足全部机动限制的自驾仪指令。
+假如预测出来的航向偏离了这个区间，那就在保持合加速度幅值不变的前提下面，把航向修正到最近的边界值 $theta_("bound")$ 上，再联立求解出加速度的最终可行解 $(u''_(x i), u''_(y i))$，经过这两级修正之后的控制量通过@eqt:control-to-autopilot 映射为满足全部机动限制的自驾仪指令。
 
 ==== *离散时间实现*
 
@@ -769,7 +712,7 @@ $
 
 $
 U_("rep")(bold(p)_i) = cases(
-  frac(1, 2) k_("rep") lr(frac(1, d_O) - frac(1, d_0))^2 quad d_O < d_0,
+  frac(1, 2) k_("rep") (frac(1, d_O) - frac(1, d_0))^2 quad d_O < d_0,
   0 quad d_O >= d_0
 )
 $
@@ -778,7 +721,7 @@ $
 
 $
 bold(f)_("rep") = cases(
-  k_("rep") lr(frac(1, d_O) - frac(1, d_0)) frac(1, d_O^2) frac(bold(p)_i - bold(c)_O, norm(bold(p)_i - bold(c)_O)) quad d_O < d_0,
+  k_("rep") (frac(1, d_O) - frac(1, d_0)) frac(1, d_O^2) frac(bold(p)_i - bold(c)_O, norm(bold(p)_i - bold(c)_O)) quad d_O < d_0,
   bold(0) quad d_O >= d_0
 )
 $
@@ -953,7 +896,7 @@ TALG 的第二项改进是把种群威胁度 $T_i in [0, 1]$ 引了进来，用�
 $
 T_i = cases(
   1.0 quad d_("min", i) <= 0 space "(碰撞区)",
-  exp(lr(-frac(2 d_("min", i), d_("safe") - d_("min", i) + epsilon))) quad 0 < d_("min", i) < d_("safe") space "(过渡区)",
+  exp(-frac(2 d_("min", i), d_("safe") - d_("min", i) + epsilon)) quad 0 < d_("min", i) < d_("safe") space "(过渡区)",
   0.0 quad d_("min", i) >= d_("safe") space "(安全区)"
 ) $ <threat-mapping>
 
@@ -980,7 +923,7 @@ F_i = cases(
 在 Mantegna Lévy 步长生成这一块，Lévy 随机步长是通过 Mantegna 算法来生成的，对于稳定指数 $beta in (0, 2)$，先构造两个相互独立的正态变量 $u ~ cal(N)(0, sigma_u^2)$ 和 $v ~ cal(N)(0, 1)$，其中：
 
 $
-sigma_u = lr(frac(Gamma(1 + beta) sin(pi beta / 2), Gamma((1 + beta) / 2) * beta * 2^((beta-1)/2)))^(1 / beta) $ <mantegna-sigma>
+sigma_u = (frac(Gamma(1 + beta) sin(pi beta / 2), Gamma((1 + beta) / 2) * beta * 2^((beta-1)/2)))^(1 / beta) $ <mantegna-sigma>
 
 那么 Lévy 步长就可以写成 $s = u / (|v|^(1/beta))$，$beta = 1.5$ 是群智能优化里面比较常用的一个折中取值，$beta$ 越小，分布的尾部就越重，跳跃也就越激进；$beta$ 越接近 2，分布就越接近正态分布，为了保证数值的稳定，分母里面引入了一个小量 $epsilon = 10^(-12)$，用来避免除零的问题。
 
@@ -1192,7 +1135,7 @@ ACO 的轨迹是最曲折的，最终到达时间是 86.00 s，在七种算法�
   label: <exp-five-metrics>,
 )
 
-五项指标的具体数值可以看表@exp-five-metrics-table，为了读起来方便，表里面用向下的箭头来表示数值越小越优，用向上的箭头来表示数值越大越优。
+五项指标的具体数值可以看@exp-five-metrics-table，为了读起来方便，表里面用向下的箭头来表示数值越小越优，用向上的箭头来表示数值越大越优。
 
 #captab(
   caption: [七种算法五项性能指标对比],
@@ -1234,7 +1177,7 @@ ACO 的轨迹是最曲折的，最终到达时间是 86.00 s，在七种算法�
   | AL-SHADE-TALG-QU | 2 | 2 | 1 | 1 | 1 | 1.4 |
 ]
 
-从表@exp-rank-table 里面可以知道，AL-SHADE-TALG-QU 的平均排名是 1.4，在七种算法当中是综合最优的，它的路径长度和到达时间都排在第二，和传统 AL-SHADE 的差距比较小；同时在路径平滑性、队形误差还有最小机间距这三项指标上排在第一，优势主要是体现在轨迹质量、编队稳定性还有安全裕度这些方面，传统 AL-SHADE 的平均排名是 2.2，综合表现是次优的，它的特点是任务效率最高，但是队形保持和机间安全不如 AL-SHADE-TALG-QU，MSA 的平均排名是 3.4，整体的表现比较均衡，GA 和 PSO 分别在最小机间距或者收敛速度方面有着一定的优势，但是综合排名是落后于 MSA、AL-SHADE 还有改进算法的，ACO 在本组指标当中的平均排名是最高的，这说明它在当前的场景下面不太适合作为复杂障碍物环境里面的首选规划算法。
+从@exp-rank-table 里面可以知道，AL-SHADE-TALG-QU 的平均排名是 1.4，在七种算法当中是综合最优的，它的路径长度和到达时间都排在第二，和传统 AL-SHADE 的差距比较小；同时在路径平滑性、队形误差还有最小机间距这三项指标上排在第一，优势主要是体现在轨迹质量、编队稳定性还有安全裕度这些方面，传统 AL-SHADE 的平均排名是 2.2，综合表现是次优的，它的特点是任务效率最高，但是队形保持和机间安全不如 AL-SHADE-TALG-QU，MSA 的平均排名是 3.4，整体的表现比较均衡，GA 和 PSO 分别在最小机间距或者收敛速度方面有着一定的优势，但是综合排名是落后于 MSA、AL-SHADE 还有改进算法的，ACO 在本组指标当中的平均排名是最高的，这说明它在当前的场景下面不太适合作为复杂障碍物环境里面的首选规划算法。
 
 == 综合分析与讨论
 
@@ -1253,6 +1196,16 @@ ACO 的轨迹是最曲折的，最终到达时间是 86.00 s，在七种算法�
 === 局限性与未来方向
 
 实验的结果表明，AL-SHADE-TALG-QU 在多项指标上面有着比较好的综合表现，不过本文还是存在着一些局限，第一，实验主要是基于一组典型的障碍物环境来展开的，还没有在不同的障碍物密度、不同的通道宽度以及不同的集群规模下面系统地检验算法排名的稳定性，第二，B 样条控制点的数量、采样的密度以及曲线的次数对路径质量所产生的影响，还需要去做进一步的分析，第三，威胁度的阈值 $d_("safe")$、相似度阈值 $tau_("sim")$ 还有 Lévy 稳定指数 $beta$ 主要是依据经验来设定的，参数的自适应能力还有提升的空间，第四，当前的实验环境还是静态的二维障碍物场景，如果要把它扩展到三维动态障碍物还有真实的低空空域里面，那就还需要继续去研究。
+
+== 本章小结
+
+本章利用仿真实验，验证了前面所设计的分层耦合路径规划框架和改进算法，实验场景设定在一个 $1000 times 1000$ 米的二维平面里，其中布置了多种障碍物，包括排列整齐的结构化障碍物、随意散布的障碍物，以及位于中心区域的瓶颈形障碍物，在保持编队控制器和改进 APF 局部避障参数不变的情况下，我们对比了七种不同的算法，分别是 PSO、ACO、GA、MSA、AHA、传统 AL-SHADE 以及 AL-SHADE-TALG-QU，通过这样的安排，能比较清楚地看到，在障碍物环境较为复杂时，不同全局规划算法对路径形状、编队保持能力，还有局部避障被触发的程度，都有着不一样的影响。
+
+分析路径可视化结果可以发现，七种算法在局部避障层的帮助下，都顺利地让无人机从起点飞到了目标点，没有发生任何碰撞，这就表明了改进 APF 能够对全局路径进行必要的安全修正，不过，不同算法给出的全局路径，在质量上的差别还是挺大的，ACO 生成的轨迹弯弯绕绕最多，飞行耗时也最长，传统 AL-SHADE 得到的路径最短、到达时间最快，然而在无人机之间的安全距离和队形稳定程度上，却比改进方法要差一些，相比之下，AL-SHADE-TALG-QU 的轨迹更加平滑，僚机在跟随过程中队形被拉伸的幅度更小，整体的安全空间也更加充足。
+
+再来看五项定量指标的结果，AL-SHADE-TALG-QU 在平均路径长度和到达时间上，与传统 AL-SHADE 的数值非常靠近，两项都排在第二位，同时，它在平均航向偏转角度、相对队形误差 RMS，还有无人机之间的最小距离这三个指标上，拿到了最好的成绩，从综合排名能进一步知道，AL-SHADE-TALG-QU 的平均排名是 1.4，是所有被测算法中整体表现最好的一个，这反映出 TALG 框架里的 B 样条路径参数化、威胁感知搜索以及外部档案去重机制，在基本保证任务效率的同时，提升了轨迹的连贯性、编队的稳定性和集群内部的安全性。
+
+总的来看，本章的实验结果证实了本文改进方法的有效性，传统 AL-SHADE 更适用于把任务效率放在第一位的场合，而 AL-SHADE-TALG-QU 在安全空间、路径平滑程度和编队保持这几个方面做得更加平衡，因此，在障碍物环境复杂、且对多机协同飞行安全有较高要求的任务中，它更加合适，不过，目前的实验主要还是基于二维且障碍物不移动的场景，对于障碍物密度变化、通道宽窄不同、集群规模更大以及三维动态环境等情况，算法的适应能力怎么样，还需要在后面的研究里做进一步的检验。
 
 = 总结与展望
 
